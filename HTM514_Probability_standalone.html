@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Probability &amp; Distribution Explorer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: recognizing whether a question calls for a normal, binomial, or Poisson model.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 3.5
+   "Probability & Distribution Explorer"
+
+   Maps to Week 3 — Probability Theory: Probability & Distribution (Chapter 6)
+   in the eight-week 2025 online course. That mapping lives in the README and in
+   this comment only: the student-facing page is concept-named and week-neutral,
+   so it can be allocated wherever Brightspace needs it. (The "Module 3.5"
+   heading above is development numbering, normalized in the final packaging
+   pass.)
+
+   One idea only, and it is the distinction the Week 7 deck of the earlier
+   sixteen-week delivery states in the instructor's own words:
+
+     "Binomial distribution describes the number of successes in a fixed
+      number of trials... Poisson distribution describes the number of events
+      that occur in a fixed interval of time or space."
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ================================================================= math ==
+     Normal: Hart's double-precision rational approximation to the standard
+     normal CDF (absolute error below 1e-15 across the supported range).
+     Binomial and Poisson: computed in logs through a Lanczos log-gamma, so
+     no factorial ever overflows at the sample sizes this module allows.
+     All three are validated in tests against independently known values.
+     ====================================================================== */
+
+  function stdNormalCdf(x) {
+    var a = Math.abs(x), cum, e, build;
+    if (a > 37) {
+      cum = 0;
+    } else {
+      e = Math.exp(-a * a / 2);
+      if (a < 7.07106781186547) {
+        build = 3.52624965998911e-02 * a + 0.700383064443688;
+        build = build * a + 6.37396220353165;
+        build = build * a + 33.912866078383;
+        build = build * a + 112.079291497871;
+        build = build * a + 221.213596169931;
+        build = build * a + 220.206867912376;
+        cum = e * build;
+        build = 8.83883476483184e-02 * a + 1.75566716318264;
+        build = build * a + 16.064177579207;
+        build = build * a + 86.7807322029461;
+        build = build * a + 296.564248779674;
+        build = build * a + 637.333633378831;
+        build = build * a + 793.826512519948;
+        build = build * a + 440.413735824752;
+        cum = cum / build;
+      } else {
+        build = a + 0.65;
+        build = a + 4 / build;
+        build = a + 3 / build;
+        build = a + 2 / build;
+        build = a + 1 / build;
+        cum = e / (build * 2.506628274631);
+      }
+    }
+    return x > 0 ? 1 - cum : cum;
+  }
+
+  function normalCdf(x, mu, sd) {
+    if (!isFinite(x) || !isFinite(mu) || !(sd > 0)) return null;
+    return stdNormalCdf((x - mu) / sd);
+  }
+  /* P(X > x) */
+  function normalTail(x, mu, sd) {
+    var c = normalCdf(x, mu, sd);
+    return c === null ? null : 1 - c;
+  }
+  /* P(lo < X < hi) */
+  function normalBetween(lo, hi, mu, sd) {
+    var a = normalCdf(lo, mu, sd), b = normalCdf(hi, mu, sd);
+    if (a === null || b === null) return null;
+    return Math.max(0, b - a);
+  }
+  function normalPdf(x, mu, sd) {
+    return Math.exp(-((x - mu) * (x - mu)) / (2 * sd * sd)) / (sd * Math.sqrt(2 * Math.PI));
+  }
+
+  function lnGamma(z) {
+    var g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+             -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+             9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+    z -= 1;
+    var x = 0.99999999999980993, i;
+    for (i = 0; i < 8; i++) x += g[i] / (z + i + 1);
+    var t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+  function lnFactorial(n) { return lnGamma(n + 1); }
+  function lnChoose(n, k) { return lnFactorial(n) - lnFactorial(k) - lnFactorial(n - k); }
+
+  /* P(X = k) for a binomial(n, p). */
+  function binomPmf(k, n, p) {
+    if (!(n >= 0) || k < 0 || k > n || k !== Math.round(k) || n !== Math.round(n)) return 0;
+    if (!(p >= 0) || !(p <= 1)) return null;
+    if (p === 0) return k === 0 ? 1 : 0;
+    if (p === 1) return k === n ? 1 : 0;
+    return Math.exp(lnChoose(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p));
+  }
+  /* P(X <= k) */
+  function binomCdf(k, n, p) {
+    if (k < 0) return 0;
+    if (k >= n) return 1;
+    var s = 0, i, v;
+    for (i = 0; i <= Math.floor(k); i++) {
+      v = binomPmf(i, n, p);
+      if (v === null) return null;
+      s += v;
+    }
+    return Math.min(1, s);
+  }
+  /* P(X >= k). The page shows the complement form the lecture uses, and for
+     an upper tail that is small the complement loses precision, so the value
+     itself is summed directly out there. The two agree far beyond the three
+     decimals ever displayed. */
+  function binomTail(k, n, p) {
+    if (k <= 0) return 1;
+    if (k > n) return 0;
+    if (!(p >= 0) || !(p <= 1)) return null;
+    if (k > n * p) {
+      var s = 0, i, v;
+      for (i = Math.ceil(k); i <= n; i++) {
+        v = binomPmf(i, n, p);
+        if (v === null) return null;
+        s += v;
+      }
+      return Math.min(1, s);
+    }
+    var c = binomCdf(k - 1, n, p);
+    return c === null ? null : Math.max(0, 1 - c);
+  }
+
+  /* P(X = k) for a Poisson(lambda). */
+  function poisPmf(k, lambda) {
+    if (k < 0 || k !== Math.round(k)) return 0;
+    if (!(lambda >= 0)) return null;
+    if (lambda === 0) return k === 0 ? 1 : 0;
+    return Math.exp(-lambda + k * Math.log(lambda) - lnFactorial(k));
+  }
+  function poisCdf(k, lambda) {
+    if (k < 0) return 0;
+    var s = 0, i, v;
+    for (i = 0; i <= Math.floor(k); i++) {
+      v = poisPmf(i, lambda);
+      if (v === null) return null;
+      s += v;
+    }
+    return Math.min(1, s);
+  }
+  /* P(X >= k), summed directly in the upper tail for the same reason as the
+     binomial above. */
+  function poisTail(k, lambda) {
+    if (k <= 0) return 1;
+    if (!(lambda >= 0)) return null;
+    if (k > lambda) {
+      var s = 0, i, v, guard = Math.ceil(k) + 2000;
+      for (i = Math.ceil(k); i <= guard; i++) {
+        v = poisPmf(i, lambda);
+        if (v === null) return null;
+        s += v;
+        if (v > 0 && v < 1e-18 * (s || 1) && i > lambda) break;
+      }
+      return Math.min(1, s);
+    }
+    var c = poisCdf(k - 1, lambda);
+    return c === null ? null : Math.max(0, 1 - c);
+  }
+
+  /* Display only. Full precision is used everywhere a decision or a further
+     calculation depends on the value. */
+  function fmtProb(p) {
+    if (p === null || p === undefined || !isFinite(p)) return "\u2014";
+    if (p > 0 && p < 0.001) return "< .001";
+    if (p < 1 && p > 0.999) return "> .999";
+    return p.toFixed(3).replace(/^0/, "");
+  }
+  function pct(p) {
+    if (p === null || !isFinite(p)) return "\u2014";
+    if (p > 0 && p < 0.001) return "under 0.1%";
+    return (p * 100).toFixed(1) + "%";
+  }
+
+  var core = {
+    stdNormalCdf: stdNormalCdf, normalCdf: normalCdf, normalTail: normalTail,
+    normalBetween: normalBetween, normalPdf: normalPdf,
+    binomPmf: binomPmf, binomCdf: binomCdf, binomTail: binomTail,
+    poisPmf: poisPmf, poisCdf: poisCdf, poisTail: poisTail,
+    fmtProb: fmtProb
+  };
+
+  /* ============================================================= content == */
+
+  var FAMILIES = [
+    {
+      id: "normal", model: "Normal",
+      label: "Hotel — how long check-in takes",
+      story: "A hotel times its check-ins. <strong>For this exercise, assume check-in time is " +
+             "approximately normally distributed</strong> with a mean of 7 minutes and a standard " +
+             "deviation of 1.5 minutes. The front-office manager wants to know how often a check-in " +
+             "runs past 9 minutes.",
+      rvStem: "Before choosing a model: what exactly is the random variable here?",
+      rvAnswer: "A continuous measurement \u2014 how many minutes one check-in takes",
+      rvWrong: [
+        { text: "The number of successes among a fixed number of trials",
+          why: "There is no fixed set of trials being counted here, and no success/failure outcome. " +
+               "One check-in produces a duration, not a yes or no." },
+        { text: "The number of events occurring in a fixed interval",
+          why: "Nothing is being counted per interval. The quantity is how long a single check-in " +
+               "lasts \u2014 a measurement on a continuous scale." }
+      ],
+      modelWhy: "Check-in time is a continuous measurement, and the exercise states it is modelled " +
+                "with a mean and a standard deviation. That is the normal distribution's shape: a " +
+                "continuous quantity centred on a mean with a spread around it.",
+      caution: "Note the wording. Continuous does not imply normal \u2014 the normal distribution is " +
+               "one common model for a continuous variable when its shape is a reasonable " +
+               "approximation, and here we are told to assume it.",
+      controls: {
+        mu: { min: 5, max: 10, step: 0.1, start: 7, label: "Mean (minutes)" },
+        sd: { min: 0.5, max: 3.5, step: 0.1, start: 1.5, label: "Standard deviation (minutes)" },
+        x: { min: 3, max: 14, step: 0.1, start: 9, label: "Threshold (minutes)" }
+      },
+      axis: [0, 16],
+      question: "P(check-in takes more than the threshold)",
+      lesson: "Standard deviation controls spread. Holding the mean fixed, a larger SD makes the " +
+              "distribution wider and flatter. How the probability beyond a particular threshold " +
+              "changes depends on where that threshold is relative to the mean \u2014 try a " +
+              "threshold below the mean as well as above it.",
+      excel: "In Excel this is 1 \u2212 NORM.DIST(threshold, mean, sd, TRUE)."
+    },
+    {
+      id: "binomial", model: "Binomial",
+      label: "Hotel — no-shows among tonight's reservations",
+      story: "Twenty reservations are on the books for tonight. Each one independently has about a " +
+             "10% chance of not showing up. The front-office manager wants to know how likely it is " +
+             "that at least 3 of them fail to arrive.",
+      rvStem: "Before choosing a model: what exactly is the random variable here?",
+      rvAnswer: "The number of successes among a fixed number of trials \u2014 how many of the 20 " +
+                "reservations are no-shows",
+      rvWrong: [
+        { text: "A continuous measurement", why: "The answer is a whole number between 0 and 20, not " +
+               "a quantity on a continuous scale." },
+        { text: "The number of events occurring in a fixed interval",
+          why: "Close, and this is the distinction worth getting right. Nothing is being counted per " +
+               "unit of time here \u2014 the count is out of a fixed set of 20 reservations." }
+      ],
+      modelWhy: "There is a fixed number of reservations, each reservation has two outcomes for this " +
+                "question (show or no-show), the probability is taken as the same for each, and we " +
+                "are counting how many no-shows occur. That is the binomial setting.",
+      caution: "Two numbers to keep apart: <strong>p = .10</strong> is the probability for one " +
+               "reservation, and <strong>X</strong> is the number of no-shows across all 20. They are " +
+               "different quantities. Real reservations are not perfectly independent \u2014 a storm " +
+               "affects them all \u2014 so this is a simplified teaching model.",
+      controls: {
+        n: { min: 10, max: 40, step: 1, start: 20, label: "Number of reservations (n)" },
+        p: { min: 0.02, max: 0.5, step: 0.01, start: 0.10, label: "No-show probability per reservation (p)" },
+        k: { min: 0, max: 40, step: 1, start: 3, label: "Count of interest (k)" }
+      },
+      axis: [0, 40],
+      /* Fixed vertical scale, set above the tallest bar any reachable (n, p)
+         can produce (0.817 at n = 10, p = .02, k = 0) so nothing is ever
+         clipped and the axes never move under the student. */
+      vmax: 0.85,
+      question: "P(X \u2265 k)",
+      lesson: "Changing p or n changes the whole distribution of the count. Notice the expected count " +
+              "np move with them \u2014 and notice that the count you actually get varies around it.",
+      excel: "In Excel this is 1 \u2212 BINOM.DIST(k \u2212 1, n, p, TRUE) \u2014 the same complement " +
+             "form the lecture uses."
+    },
+    {
+      id: "poisson", model: "Poisson",
+      label: "Front desk — arrivals in the next ten minutes",
+      story: "Guests arrive at the front desk at an average rate of about 4 per 10 minutes. The " +
+             "supervisor is deciding whether to keep a second agent on the desk, and wants to know " +
+             "how likely 7 or more arrivals are in a single 10-minute stretch.",
+      rvStem: "Before choosing a model: what exactly is the random variable here?",
+      rvAnswer: "The number of events occurring in a fixed interval \u2014 how many guests arrive in " +
+                "one 10-minute stretch",
+      rvWrong: [
+        { text: "A continuous measurement", why: "The answer is a whole number of arrivals, not a " +
+               "measurement on a continuous scale." },
+        { text: "The number of successes among a fixed number of trials",
+          why: "This is the distinction worth getting right. There is no fixed set of trials \u2014 " +
+               "no list of twenty guests each deciding yes or no. There is an interval of time and a " +
+               "count of what happens in it." }
+      ],
+      modelWhy: "We are counting how many arrivals occur during a fixed interval of time, using an " +
+                "average rate for that interval. That is the Poisson setting \u2014 no fixed number " +
+                "of trials, just an interval and a rate.",
+      caution: "\u03BB is the expected number of arrivals in the chosen interval under the model, not " +
+               "a maximum and not necessarily the most likely single count. The model also assumes " +
+               "arrivals occur independently at a steady rate, which a check-in rush would violate.",
+      controls: {
+        lambda: { min: 0.5, max: 15, step: 0.5, start: 4, label: "Average arrivals per 10 minutes (\u03BB)" },
+        k: { min: 0, max: 30, step: 1, start: 7, label: "Count of interest (k)" }
+      },
+      axis: [0, 30],
+      /* Tallest reachable bar is 0.607 at lambda = 0.5, k = 0. */
+      vmax: 0.65,
+      question: "P(X \u2265 k)",
+      lesson: "\u03BB is an average for the interval; the actual count varies around it. Raising " +
+              "\u03BB shifts the whole distribution to the right and spreads it out.",
+      excel: "In Excel this is 1 \u2212 POISSON.DIST(k \u2212 1, \u03BB, TRUE)."
+    }
+  ];
+
+  core.families = FAMILIES;
+
+  /* The distribution-choice pool. Every Normal item states the normal-model
+     assumption in its own text, so no item asks a student to infer normality
+     from continuity alone. */
+  var CHOICE_ITEMS = [
+    {
+      id: "cancellations", answer: "Binomial",
+      stem: "A resort has 40 bookings for next weekend, each independently about 8% likely to cancel. " +
+            "What is the chance that more than 5 cancel?",
+      why: "A fixed number of bookings, two outcomes each, counting how many cancel \u2014 the " +
+           "binomial setting."
+    },
+    {
+      id: "calls", answer: "Poisson",
+      stem: "Calls arrive at the reservations line at an average of 9 per 15 minutes. What is the " +
+            "chance of 15 or more calls in one 15-minute stretch?",
+      why: "A count of events in a fixed interval of time, given an average rate. No fixed set of " +
+           "trials appears anywhere in the question."
+    },
+    {
+      id: "cleaning", answer: "Normal",
+      stem: "Room-cleaning time averages 26 minutes with a standard deviation of 5 minutes, and is " +
+            "assumed to be approximately normally distributed. What fraction of rooms take longer " +
+            "than 35 minutes?",
+      why: "A continuous measurement with a stated mean and standard deviation, and the question " +
+           "tells you to assume the normal model. Without that sentence you would not know the shape."
+    },
+    {
+      id: "upgrades", answer: "Binomial",
+      stem: "Twenty-five arriving guests are each offered a paid upgrade, and each accepts " +
+            "independently with probability .18. What is the chance that at least 7 accept?",
+      why: "Twenty-five offers is the fixed number of trials, accept or decline is the two-outcome " +
+           "event, and the count of acceptances is what we want."
+    },
+    {
+      id: "walkins", answer: "Poisson",
+      stem: "Walk-ins arrive at an average of 2.5 per hour. What is the chance of no walk-ins at all " +
+            "during one particular hour?",
+      why: "Events counted over an interval at an average rate. Note that this one is asking about " +
+           "the count 0, which is a perfectly ordinary Poisson question."
+    },
+    {
+      id: "spending", answer: "Normal",
+      stem: "On-property spending per stay is modelled as approximately normal with a mean of $310 " +
+            "and a standard deviation of $95. What share of stays fall between $250 and $400?",
+      why: "A continuous amount with a stated mean and standard deviation, explicitly modelled as " +
+           "normal. Spending is often skewed in reality \u2014 the normal model is an assumption the " +
+           "question is making, not a fact about spending."
+    }
+  ];
+
+  core.choiceItems = CHOICE_ITEMS;
+
+  global.HTM514_PROB = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag), k;
+    for (k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* ========================================================== quick check == */
+
+  function quickCheck() {
+    return CHOICE_ITEMS.map(function (item) {
+      var models = ["Normal", "Binomial", "Poisson"];
+      return {
+        stem: item.stem + "<br><br>Which model fits?",
+        options: models.map(function (m) {
+          return {
+            text: m, correct: m === item.answer,
+            why: m === item.answer
+              ? item.why
+              : (item.answer === "Binomial"
+                  ? "This one is binomial: " + item.why
+                  : (item.answer === "Poisson"
+                      ? "This one is Poisson: " + item.why
+                      : "This one is normal: " + item.why))
+          };
+        })
+      };
+    });
+  }
+
+  /* =============================================================== page === */
+
+  var pageModule = {
+    title: "Which kind of uncertainty is this?",
+    subtitle: "Normal, binomial, or Poisson \u2014 the model follows from what the random variable is.",
+    courseFit: "Optional practice for Probability & Distribution. About seven minutes. Nothing is " +
+               "submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { f: FAMILIES[0], c: {} };
+
+      /* --- step 1: the situation ------------------------------------------ */
+      var s1 = steps.add({ id: "situation", title: "The situation" });
+      var story = h("p", { class: "scenario-text" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a situation",
+        onchange: function () { setFamily(this.value); }
+      });
+      FAMILIES.forEach(function (f) { picker.appendChild(h("option", { value: f.id, text: f.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Situation" }), picker])
+      ]));
+      var rvSlot = h("div");
+      s1.body.appendChild(rvSlot);
+
+      /* --- step 2: which model -------------------------------------------- */
+      var s2 = steps.add({ id: "model", title: "Which model fits?", locked: true });
+      var modelSlot = h("div");
+      s2.body.appendChild(modelSlot);
+      var caution = h("p", { class: "hint" });
+      s2.body.appendChild(caution);
+
+      /* --- step 3: explore ------------------------------------------------- */
+      var s3 = steps.add({ id: "explore", title: "Explore the model", locked: true });
+      var controlsBox = h("div");
+      s3.body.appendChild(controlsBox);
+      var chartBox = h("div", { class: "chart-box" });
+      var chart = svgEl("svg", { viewBox: "0 0 640 200", role: "img", style: "width:100%;height:auto" });
+      chartBox.appendChild(chart);
+      var chartCap = h("p", { class: "cap" });
+      chartBox.appendChild(chartCap);
+      s3.body.appendChild(chartBox);
+      var answer = h("div", { class: "feedback" });
+      s3.body.appendChild(answer);
+      var working = h("p", { class: "hint" });
+      s3.body.appendChild(working);
+      var lesson = h("p", {});
+      s3.body.appendChild(lesson);
+
+      /* --- step 4: binomial against Poisson --------------------------------- */
+      var s4 = steps.add({ id: "compare", title: "Binomial or Poisson?", locked: true });
+      var compareSlot = h("div");
+      s4.body.appendChild(compareSlot);
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+
+      /* --- step 5: quick check ------------------------------------------------ */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another situation",
+          onclick: function () {
+            var i = FAMILIES.indexOf(state.f);
+            var next = FAMILIES[(i + 1) % FAMILIES.length];
+            picker.value = next.id;
+            setFamily(next.id);
+            document.getElementById("step-situation").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* ---------------------------------------------------------- helpers - */
+
+      function ctl(key) { return state.f.controls[key]; }
+      function val(key) { return state.c[key]; }
+
+      function setFamily(id) {
+        state.f = FAMILIES.filter(function (f) { return f.id === id; })[0];
+        state.c = {};
+        var k;
+        for (k in state.f.controls) state.c[k] = state.f.controls[k].start;
+        story.innerHTML = state.f.story;
+        caution.innerHTML = state.f.caution;
+        lesson.textContent = state.f.lesson;
+        renderRv();
+        renderModel();
+        renderControls();
+        renderCompare();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(), 935).el);
+        renderAll();
+        ["model", "explore", "compare", "check"].forEach(function (key) {
+          document.getElementById("step-" + key).setAttribute("data-locked", "true");
+        });
+      }
+
+      function renderRv() {
+        var f = state.f;
+        rvSlot.innerHTML = "";
+        var opts = [{ text: f.rvAnswer, correct: true,
+          why: "Naming the random variable first is what makes the model choice easy \u2014 that is " +
+               "the whole trick in this step." }];
+        f.rvWrong.forEach(function (o) {
+          opts.push({ text: o.text, correct: false, why: o.why });
+        });
+        rvSlot.appendChild(new H.Choices({ stem: f.rvStem, options: opts }, function () {
+          steps.unlock("model");
+          H.announce("Now choose the model below.");
+        }).el);
+      }
+
+      function renderModel() {
+        var f = state.f;
+        modelSlot.innerHTML = "";
+        var models = ["Normal", "Binomial", "Poisson"];
+        var wrongWhy = {
+          Normal: "Normal is for a continuous quantity described by a mean and a spread, not for a count.",
+          Binomial: "Binomial is for the number of successes among a fixed number of trials. Look for " +
+                    "the fixed n and the two-outcome event.",
+          Poisson: "Poisson is for the number of events in a fixed interval, given an average rate. " +
+                   "Look for the interval and the rate."
+        };
+        modelSlot.appendChild(new H.Choices({
+          stem: "So which probability model fits this situation?",
+          options: models.map(function (m) {
+            return { text: m, correct: m === f.model,
+              why: m === f.model ? f.modelWhy : (wrongWhy[m] + " Here: " + f.modelWhy) };
+          })
+        }, function () {
+          ["explore", "compare", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("The " + f.model.toLowerCase() + " model is now available to explore below.");
+        }).el);
+      }
+
+      function renderControls() {
+        var f = state.f;
+        controlsBox.innerHTML = "";
+        var row = h("div", { class: "controls" });
+        Object.keys(f.controls).forEach(function (key) {
+          var c = f.controls[key];
+          var input = h("input", {
+            type: "range", id: key + "-range", min: c.min, max: c.max, step: c.step,
+            value: String(state.c[key]), "aria-label": c.label,
+            oninput: function () { setControl(key, Number(this.value)); }
+          });
+          row.appendChild(h("div", { class: "control" }, [
+            h("label", { for: key + "-range", id: key + "-lab", text: c.label }), input
+          ]));
+        });
+        controlsBox.appendChild(row);
+        controlsBox.appendChild(h("div", { class: "controls" }, [
+          h("button", { class: "quiet", type: "button", text: "Reset to the scenario",
+            onclick: function () {
+              var k;
+              for (k in f.controls) {
+                state.c[k] = f.controls[k].start;
+                document.getElementById(k + "-range").value = String(state.c[k]);
+              }
+              renderAll();
+            } })
+        ]));
+      }
+
+      function setControl(key, v) {
+        state.c[key] = v;
+        // k can never exceed n in the binomial setting
+        if (state.f.id === "binomial") {
+          var kEl = document.getElementById("k-range");
+          kEl.max = String(state.c.n);
+          if (state.c.k > state.c.n) {
+            state.c.k = state.c.n;
+            kEl.value = String(state.c.k);
+          }
+        }
+        renderAll();
+      }
+
+      /* ------------------------------------------------------------ render - */
+
+      function renderAll() {
+        var f = state.f;
+        Object.keys(f.controls).forEach(function (key) {
+          var lab = document.getElementById(key + "-lab");
+          if (lab) lab.textContent = f.controls[key].label + ": " + fmtVal(key, state.c[key]);
+        });
+        if (f.id === "normal") renderNormal();
+        else renderDiscrete();
+      }
+
+      function fmtVal(key, v) {
+        if (key === "p") return v.toFixed(2).replace(/^0/, "");
+        if (key === "lambda") return v.toFixed(1);
+        if (key === "n" || key === "k") return String(v);
+        return v.toFixed(1);
+      }
+
+      function renderNormal() {
+        var f = state.f, mu = val("mu"), sd = val("sd"), x = val("x");
+        var p = normalTail(x, mu, sd);
+        drawNormal(mu, sd, x);
+        answer.setAttribute("data-verdict", "ok");
+        answer.innerHTML = "<span class='verdict'>P(check-in longer than " + x.toFixed(1) +
+          " minutes) = " + fmtProb(p) + "</span> \u2014 under this model about " + pct(p) +
+          " of check-ins would run past " + x.toFixed(1) + " minutes.";
+        working.innerHTML = "The threshold sits " + ((x - mu) / sd).toFixed(2) +
+          " standard deviations from the mean, and the shaded area to its right is the probability. " +
+          f.excel;
+        H.announce("Probability " + fmtProb(p) + ".");
+      }
+
+      function renderDiscrete() {
+        var f = state.f, k = val("k"), p, pmf, cdfBelow, mean;
+        if (f.id === "binomial") {
+          var n = val("n"), pp = val("p");
+          p = binomTail(k, n, pp);
+          pmf = binomPmf(k, n, pp);
+          cdfBelow = binomCdf(k - 1, n, pp);
+          mean = n * pp;
+        } else {
+          var lam = val("lambda");
+          p = poisTail(k, lam);
+          pmf = poisPmf(k, lam);
+          cdfBelow = poisCdf(k - 1, lam);
+          mean = lam;
+        }
+        drawDiscrete();
+        answer.setAttribute("data-verdict", "ok");
+        answer.innerHTML = "<span class='verdict'>P(X \u2265 " + k + ") = " + fmtProb(p) +
+          "</span> \u2014 about " + pct(p) + ". P(X = " + k + ") on its own is " + fmtProb(pmf) +
+          ". Expected count under the model: " + mean.toFixed(2) + ".";
+        working.innerHTML = "<strong>Complement rule:</strong> P(X \u2265 " + k + ") = 1 \u2212 P(X " +
+          "\u2264 " + (k - 1) + ") = 1 \u2212 " + fmtProb(cdfBelow) + " = " + fmtProb(p) +
+          ". " + f.excel;
+        H.announce("Probability " + fmtProb(p) + ".");
+      }
+
+      /* --------------------------------------------------------------- svg - */
+
+      function drawNormal(mu, sd, x) {
+        var f = state.f;
+        var W = 640, L = 30, R = 24, T = 16, B = 34, Ht = 200;
+        var pw = W - L - R, ph = Ht - T - B;
+        var lo = f.axis[0], hi = f.axis[1];
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        // fixed vertical scale: the tallest curve the controls allow
+        var peak = normalPdf(0, 0, f.controls.sd.min);
+        var Y = function (d) { return T + ph - (d / peak) * (ph - 8); };
+        while (chart.firstChild) chart.removeChild(chart.firstChild);
+
+        // shaded tail beyond the threshold
+        var pts = [], i, v;
+        for (i = 0; i <= 80; i++) {
+          v = x + (hi - x) * (i / 80);
+          pts.push(X(v) + "," + Y(normalPdf(v, mu, sd)));
+        }
+        pts.push(X(hi) + "," + Y(0), X(x) + "," + Y(0));
+        chart.appendChild(svgEl("polygon", { points: pts.join(" "),
+          fill: "#CFB991", stroke: "#8E7B4F", "stroke-width": 1 }));
+
+        // the curve
+        var d = [], j, vv;
+        for (j = 0; j <= 200; j++) {
+          vv = lo + (hi - lo) * (j / 200);
+          d.push((j ? "L" : "M") + X(vv) + " " + Y(normalPdf(vv, mu, sd)));
+        }
+        chart.appendChild(svgEl("path", { d: d.join(" "), fill: "none",
+          stroke: "#131313", "stroke-width": 1.5 }));
+
+        line(chart, L, Y(0), L + pw, Y(0), "#131313", 1);
+        line(chart, X(mu), Y(0), X(mu), Y(normalPdf(mu, mu, sd)), "#131313", 1, "3,3");
+        txt(chart, X(mu), T + 10, "mean " + mu.toFixed(1), "11", "#131313", "middle");
+        line(chart, X(x), Y(0) + 6, X(x), T + 20, "#131313", 2);
+        txt(chart, X(x), T + 16, "threshold " + x.toFixed(1), "11", "#131313", "middle");
+
+        axisTicks(X, Y(0), lo, hi, function (v) { return v.toFixed(0); });
+        chartCap.textContent = "Normal model, mean " + mu.toFixed(1) + " and standard deviation " +
+          sd.toFixed(1) + ". The shaded area to the right of the threshold is the probability. The " +
+          "horizontal and vertical scales are fixed, so a larger standard deviation visibly flattens " +
+          "and widens the curve.";
+        chart.setAttribute("aria-label", "Normal density curve with mean " + mu.toFixed(1) +
+          " and standard deviation " + sd.toFixed(1) + ", with the area beyond " + x.toFixed(1) +
+          " shaded. That area is " + fmtProb(normalTail(x, mu, sd)) + ".");
+      }
+
+      function drawDiscrete() {
+        var f = state.f;
+        var W = 640, L = 30, R = 24, T = 16, B = 34, Ht = 200;
+        var pw = W - L - R, ph = Ht - T - B;
+        var lo = f.axis[0], hi = f.axis[1];
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        var k = val("k"), i, pr, probs = [], peak = 0;
+        for (i = lo; i <= hi; i++) {
+          pr = f.id === "binomial" ? binomPmf(i, val("n"), val("p")) : poisPmf(i, val("lambda"));
+          probs.push(pr);
+          if (pr > peak) peak = pr;
+        }
+        // fixed vertical scale so the bars do not rescale on every change
+        var vmax = f.vmax;
+        var Y = function (p) { return T + ph - (Math.min(p, vmax) / vmax) * (ph - 8); };
+        while (chart.firstChild) chart.removeChild(chart.firstChild);
+
+        var bw = Math.max(3, (pw / (hi - lo + 1)) - 2);
+        probs.forEach(function (pr2, idx) {
+          var v = lo + idx;
+          var inTail = v >= k;
+          var x0 = X(v) - bw / 2, y0 = Y(pr2);
+          chart.appendChild(svgEl("rect", { x: x0, y: y0, width: bw, height: Math.max(0, Y(0) - y0),
+            fill: inTail ? "#CFB991" : "#FFFFFF", stroke: "#131313", "stroke-width": 1 }));
+        });
+        line(chart, L, Y(0), L + pw, Y(0), "#131313", 1);
+        line(chart, X(k) - bw / 2 - 2, T + 6, X(k) - bw / 2 - 2, Y(0), "#131313", 2, "4,3");
+        txt(chart, Math.min(X(k) + 40, L + pw - 4), T + 12, "shaded: X \u2265 " + k, "11", "#131313", "middle");
+
+        axisTicks(X, Y(0), lo, hi, function (v) { return String(Math.round(v)); });
+        chartCap.textContent = (f.id === "binomial" ? "Binomial" : "Poisson") +
+          " probabilities, one bar per possible count. Filled bars are the counts included in " +
+          "X \u2265 " + k + "; the dashed line marks k. Both scales are fixed, so changing the " +
+          "controls moves the distribution rather than the axes.";
+        chart.setAttribute("aria-label", (f.id === "binomial" ? "Binomial" : "Poisson") +
+          " probability bars from " + lo + " to " + hi + ". The bars from " + k +
+          " upward are shaded and total " + fmtProb(f.id === "binomial"
+            ? binomTail(k, val("n"), val("p")) : poisTail(k, val("lambda"))) + ".");
+      }
+
+      function axisTicks(X, y0, lo, hi, fmt) {
+        [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+          var v = lo + t * (hi - lo);
+          line(chart, X(v), y0, X(v), y0 + 4, "#131313", 1);
+          txt(chart, X(v), y0 + 17, fmt(v), "11", "#6B6B6B", "middle");
+        });
+      }
+
+      /* ------------------------------------------------------------ step 4 - */
+
+      function renderCompare() {
+        compareSlot.innerHTML = "";
+        compareSlot.appendChild(new H.Choices({
+          stem: "Why is \u201C3 no-shows among 20 reservations\u201D naturally binomial, while " +
+                "\u201C3 walk-in arrivals in the next 10 minutes\u201D is naturally Poisson?",
+          options: [
+            { text: "The first counts successes among a fixed number of trials; the second counts " +
+                    "events occurring in a fixed interval.", correct: true,
+              why: "That is the distinction, and it is the one worth carrying out of this chapter. Ask " +
+                   "first: is there a fixed set of things each of which either does or does not " +
+                   "happen, or is there an interval in which events accumulate at some rate?" },
+            { text: "Because no-shows are common and walk-ins are rare.", correct: false,
+              why: "Frequency is not what separates them. Poisson is for event counts over a " +
+                   "specified interval given an average rate \u2014 the rate can be high or low." },
+            { text: "Because one is discrete and the other is continuous.", correct: false,
+              why: "Both are counts, so both are discrete. What differs is what is being counted " +
+                   "over: a fixed number of trials, or an interval." },
+            { text: "Because the binomial needs a large sample and the Poisson does not.", correct: false,
+              why: "Neither claim holds. The choice follows from the structure of the question, not " +
+                   "from how much data there is." }
+          ]
+        }).el);
+
+        meaning.innerHTML = "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What probability can tell you</strong>These models quantify uncertainty under " +
+          "stated assumptions \u2014 given the mean and spread, or the n and p, or the rate, they say " +
+          "how likely each outcome is.</div>" +
+          "<div><strong>What it does not guarantee</strong>A 20% probability does not mean the event " +
+          "occurs in exactly one of every five nights. Over a small number of cases the realised " +
+          "counts scatter around the model, sometimes well away from it.</div>" +
+          "<div><strong>What a manager could reasonably do</strong>Use the model to quantify the " +
+          "likelihood of operational outcomes and to compare scenarios \u2014 remembering that the " +
+          "answer depends on the assumptions and the inputs, both of which are chosen rather than " +
+          "observed.</div></div>";
+      }
+
+      function line(svg, x1, y1, x2, y2, stroke, w, dash) {
+        var a = { x1: x1, y1: y1, x2: x2, y2: y2, stroke: stroke, "stroke-width": w };
+        if (dash) a["stroke-dasharray"] = dash;
+        svg.appendChild(svgEl("line", a));
+      }
+      function txt(svg, x, y, s, size, fill, anchor) {
+        var n = svgEl("text", { x: x, y: y, "font-size": size, fill: fill, "text-anchor": anchor,
+          "font-family": "Segoe UI, Arial, sans-serif" });
+        n.textContent = s;
+        svg.appendChild(n);
+      }
+
+      picker.value = FAMILIES[0].id;
+      setFamily(FAMILIES[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

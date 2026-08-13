@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Mean, Median &amp; Outlier Explorer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: how one extreme observation moves the mean much more than the median.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 8
+   "Mean, Median & Outlier Explorer"
+
+   Fits beside Week 3 (Describing the Distribution of a Variable, Ch. 2).
+   The smallest module in the collection, deliberately: one slider, two
+   statistics, one idea.
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ================================================================= math == */
+
+  function mean(a) {
+    if (!a || !a.length) return null;
+    var s = 0, i;
+    for (i = 0; i < a.length; i++) {
+      if (!isFinite(a[i])) return null;
+      s += a[i];
+    }
+    return s / a.length;
+  }
+
+  function sorted(a) {
+    return a.slice().sort(function (x, y) { return x - y; });
+  }
+
+  /* General median: middle value for odd n, average of the two middle values
+     for even n. Never assumes the moved observation is still the largest. */
+  function median(a) {
+    if (!a || !a.length) return null;
+    var s = sorted(a), n = s.length, mid = Math.floor(n / 2);
+    var i;
+    for (i = 0; i < n; i++) if (!isFinite(s[i])) return null;
+    return n % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+  }
+
+  /* The dataset with the highlighted observation set to v. */
+  function withValue(sc, v) {
+    var vals = sc.base.slice();
+    vals[sc.focus] = v;
+    return vals;
+  }
+
+  function summary(sc, v) {
+    var vals = withValue(sc, v);
+    var base = sc.base;
+    return {
+      values: vals, sortedValues: sorted(vals),
+      mean: mean(vals), median: median(vals),
+      baseMean: mean(base), baseMedian: median(base),
+      meanShift: mean(vals) - mean(base),
+      medianShift: median(vals) - median(base),
+      gap: mean(vals) - median(vals)
+    };
+  }
+
+  var core = { mean: mean, median: median, sorted: sorted,
+               withValue: withValue, summary: summary };
+
+  /* ============================================================= content == */
+
+  var SCENARIOS = [
+    {
+      id: "rates",
+      label: "Hotel — rates booked on one night",
+      noun: "room", nounPl: "rooms", thing: "rate paid",
+      unit: { prefix: "$" }, decimals: 2, axisDecimals: 0,
+      base: [95, 120, 140, 155, 175, 195, 240],
+      focus: 6,
+      range: [90, 520], step: 5,
+      story: "Seven rooms were booked at one small property last night, at the rates below. The " +
+             "highlighted booking is a suite \u2014 the one rate that could be very different from " +
+             "the others.",
+      typicalQ: "Suppose the highlighted booking is far above the rest, as in the high-outlier case " +
+                "you just explored. The general manager wants to describe what a <em>typical</em> " +
+                "guest paid that night. Which summary may be more informative?",
+      totalQ: "The revenue manager wants a simple projection of total room revenue from 100 similar " +
+              "bookings. Which summary multiplies directly into that projection?",
+      totalWhy: "For a simple projection of 100 similar bookings, the mean per booking is the summary " +
+                "that multiplies directly: projected total = 100 \u00D7 estimated average per booking. " +
+                "The median does not \u2014 100 \u00D7 the median is not the total. This assumes the " +
+                "observed bookings are a reasonable basis for the bookings being projected.",
+      unusualNote: "A suite selling far above the other rooms is a real booking, not a mistake."
+    },
+    {
+      id: "checks",
+      label: "Restaurant — dinner checks on one evening",
+      noun: "check", nounPl: "checks", thing: "check total",
+      unit: { prefix: "$" }, decimals: 2, axisDecimals: 0,
+      base: [28, 35, 42, 48, 56, 64, 85],
+      focus: 6,
+      range: [25, 260], step: 5,
+      story: "Seven checks closed in one dinner hour. The highlighted check is the large table in the " +
+             "corner \u2014 the one total that could be far above the rest.",
+      typicalQ: "Suppose the highlighted check is far above the rest, as in the high-outlier case " +
+                "you just explored. The manager wants to describe what a <em>typical</em> table spent " +
+                "that hour. Which summary may be more informative?",
+      totalQ: "The manager wants a simple projection of total revenue from 100 similar checks. Which " +
+              "summary multiplies directly into that projection?",
+      totalWhy: "For a simple projection of 100 similar checks, the mean per check is the summary that " +
+                "multiplies directly: projected total = 100 \u00D7 estimated average check. The median " +
+                "does not \u2014 100 \u00D7 the median is not the total. This assumes the observed " +
+                "checks are a reasonable basis for the checks being projected.",
+      unusualNote: "A large party is a real table, not a data error."
+    },
+    {
+      id: "spending",
+      label: "Resort — on-property spending per stay",
+      noun: "stay", nounPl: "stays", thing: "spending per stay",
+      unit: { prefix: "$" }, decimals: 2, axisDecimals: 0,
+      base: [60, 110, 140, 180, 220, 260, 340],
+      focus: 6,
+      range: [50, 900], step: 10,
+      story: "Seven folios from one week, showing what each guest spent on property. The highlighted " +
+             "stay is a guest who booked spa treatments and a private dinner.",
+      typicalQ: "Suppose the highlighted stay is far above the rest, as in the high-outlier case you " +
+                "just explored. Marketing wants to describe what a <em>typical</em> guest spends on " +
+                "property. Which summary may be more informative?",
+      totalQ: "Finance wants a simple projection of total on-property spending for 100 similar stays. " +
+              "Which summary multiplies directly into that projection?",
+      totalWhy: "For a simple projection of 100 similar stays, the mean per stay is the summary that " +
+                "multiplies directly: projected total = 100 \u00D7 estimated average spend. The median " +
+                "does not \u2014 100 \u00D7 the median is not the total. This assumes the observed " +
+                "stays are a reasonable basis for the stays being projected.",
+      unusualNote: "A high-spending guest is a real guest, and one worth understanding rather than " +
+                   "deleting."
+    }
+  ];
+
+  core.scenarios = SCENARIOS;
+
+  global.HTM514_MMO = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag), k;
+    for (k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* ========================================================== quick check == */
+
+  function quickCheck(sc) {
+    return [
+      {
+        stem: "Which summary is usually more sensitive to one extreme observation?",
+        options: [
+          { text: "The mean.", correct: true,
+            why: "Every value enters the mean directly, so one very large or very small observation " +
+                 "pulls it toward that extreme. The median depends mainly on the middle position." },
+          { text: "The median.", correct: false,
+            why: "The median is usually the steadier of the two \u2014 not immune, but much less " +
+                 "moved by how far out one endpoint sits." },
+          { text: "They move by the same amount.", correct: false,
+            why: "Try the slider: the mean moves several times as far as the median in this data set." }
+        ]
+      },
+      {
+        stem: "Why does the mean move when the highlighted " + sc.noun + " moves?",
+        options: [
+          { text: "Because the mean adds every value and divides by how many there are, so a change " +
+                  "in any value changes the total.", correct: true,
+            why: "With seven observations, adding $70 to one of them adds $10 to the mean. That is the " +
+                 "whole mechanism." },
+          { text: "Because the mean always follows the largest value.", correct: false,
+            why: "It follows the total. Moving the highlighted " + sc.noun + " down pulls the mean " +
+                 "down just as readily." },
+          { text: "Because the ordering of the data changed.", correct: false,
+            why: "Ordering is what the median depends on. The mean does not care about order at all." }
+        ]
+      },
+      {
+        stem: "Why can the median stay put while the mean moves a long way?",
+        options: [
+          { text: "Because the median depends primarily on order and middle position, so the magnitude " +
+                  "of an extreme endpoint has less influence.", correct: true,
+            why: "Once an observation is the largest, pushing it further out does not change which " +
+                 "value sits in the middle. It still counts \u2014 it is still one of the seven \u2014 " +
+                 "but its size stops mattering." },
+          { text: "Because the median ignores extreme observations.", correct: false,
+            why: "It does not ignore them. They are counted in the ordering; what changes little is the " +
+                 "influence of <em>how far out</em> they sit." },
+          { text: "Because the median is calculated only from the middle three values.", correct: false,
+            why: "Every observation takes part in the ordering. The middle position is what is read off " +
+                 "at the end." }
+        ]
+      },
+      {
+        stem: "The highlighted " + sc.noun + " is far above the others. Should it be deleted?",
+        options: [
+          { text: "Not automatically \u2014 an unusual observation may be a valid case, a special " +
+                  "situation, or a data-quality problem. Context decides.", correct: true,
+            why: sc.unusualNote + " Deleting it would describe a business that did not happen. The " +
+                 "question to ask first is what produced the value." },
+          { text: "Yes \u2014 outliers are errors and should be removed before summarizing.", correct: false,
+            why: "Some are errors; many are the most interesting cases in the data. Removing them by " +
+                 "rule quietly changes what is being described." },
+          { text: "Yes, if it moves the mean by more than a few percent.", correct: false,
+            why: "How much a value moves a statistic says nothing about whether the value is real." }
+        ]
+      },
+      {
+        stem: "Is the median always the better business summary?",
+        options: [
+          { text: "No \u2014 the two answer different descriptive questions, and which fits depends on " +
+                  "the purpose.", correct: true,
+            why: "For a typical guest the median is often the better description. For anything that " +
+                 "multiplies up to a total, the mean is the one that works." },
+          { text: "Yes \u2014 the median is more robust, so it is the safer choice every time.", correct: false,
+            why: "Robust to what, and for what purpose? Total revenue cannot be built from a median." },
+          { text: "Yes, whenever the data are skewed.", correct: false,
+            why: "For strongly skewed data the mean and the median answer somewhat different " +
+                 "descriptive questions \u2014 that is a reason to know which you want, not a rule " +
+                 "that retires one of them." }
+        ]
+      }
+    ];
+  }
+
+  /* =============================================================== page === */
+
+  var pageModule = {
+    title: "One booking moves everything \u2014 or almost nothing",
+    subtitle: "What an extreme observation does to the mean, and why the median barely notices.",
+    courseFit: "Optional practice for Week 3 (Describing the Distribution of a Variable, Ch. 2). " +
+               "About four minutes. Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { sc: SCENARIOS[0], v: 0 };
+
+      /* --- step 1: the data ---------------------------------------------- */
+      var s1 = steps.add({ id: "data", title: "The data" });
+      var story = h("p", { class: "scenario-text" });
+      var plotBox = h("div", { class: "chart-box" });
+      var plot = svgEl("svg", { viewBox: "0 0 640 130", role: "img", style: "width:100%;height:auto" });
+      plotBox.appendChild(plot);
+      var plotCap = h("p", { class: "cap" });
+      plotBox.appendChild(plotCap);
+      var listLine = h("p", { class: "hint" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a scenario",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(plotBox);
+      s1.body.appendChild(listLine);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Scenario" }), picker])
+      ]));
+
+      /* --- step 2: predict ------------------------------------------------ */
+      var s2 = steps.add({ id: "predict", title: "Predict" });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* --- step 3: move one observation ----------------------------------- */
+      var s3 = steps.add({
+        id: "move", title: "Move the highlighted " + "observation", locked: true,
+        hint: "Only that one value changes. The other six stay exactly where they are."
+      });
+      var vRange = h("input", {
+        type: "range", id: "v-range", "aria-label": "Value of the highlighted observation",
+        oninput: function () { state.v = Number(this.value); renderAll(); }
+      });
+      var vLab = h("label", { for: "v-range", id: "v-lab" });
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [vLab, vRange]),
+        h("button", { class: "quiet", type: "button", text: "Reset to starting value",
+          onclick: function () { reset(); } })
+      ]));
+      var readout = h("table", { class: "readout" });
+      s3.body.appendChild(readout);
+      var verdict = h("div", { class: "feedback" });
+      s3.body.appendChild(verdict);
+      var working = h("p", { class: "hint" });
+      s3.body.appendChild(working);
+      var why = h("p", {});
+      s3.body.appendChild(why);
+
+      /* --- step 4: which summary fits --------------------------------------- */
+      var s4 = steps.add({ id: "choose", title: "Which summary fits the question?", locked: true });
+      var typicalSlot = h("div");
+      var totalSlot = h("div");
+      s4.body.appendChild(typicalSlot);
+      s4.body.appendChild(totalSlot);
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+
+      /* --- step 5: quick check ------------------------------------------------ */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another scenario",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-data").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* ------------------------------------------------------- formatting - */
+
+      function u(x, d) {
+        var sc = state.sc, dec = d === undefined ? sc.decimals : d;
+        if (!isFinite(x)) return "\u2014";
+        return (x < 0 ? "\u2212" : "") + (sc.unit.prefix || "") + Math.abs(x).toFixed(dec);
+      }
+      function u0(x) { return u(x, 0); }
+      function signed(x, d) {
+        var dec = d === undefined ? state.sc.decimals : d;
+        return (x > 0 ? "+" : (x < 0 ? "\u2212" : "")) + (state.sc.unit.prefix || "") +
+               Math.abs(x).toFixed(dec);
+      }
+
+      /* --------------------------------------------------------- scenario - */
+
+      function setScenario(id) {
+        var sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.sc = sc;
+        state.v = sc.base[sc.focus];
+        vRange.min = sc.range[0]; vRange.max = sc.range[1]; vRange.step = sc.step;
+        vRange.value = String(state.v);
+        story.textContent = sc.story;
+        s3.section.querySelector("h2").textContent = "Move the highlighted " + sc.noun;
+        renderPrediction();
+        renderChoose();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(sc), 818).el);
+        renderAll();
+        ["move", "choose", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      function reset() {
+        state.v = state.sc.base[state.sc.focus];
+        vRange.value = String(state.v);
+        renderAll();
+      }
+
+      function renderPrediction() {
+        predictSlot.innerHTML = "";
+        var sc = state.sc;
+        var s0 = summary(sc, sc.base[sc.focus]);
+        var far = summary(sc, sc.range[1]);
+        var reveal = "At the top of the slider the mean moves by " +
+          signed(far.meanShift) + " and the median by " + signed(far.medianShift) + ". Move the " +
+          "slider yourself and watch which marker travels.";
+        var q = {
+          stem: "If the highlighted " + sc.noun + " became far more expensive than the others, which " +
+                "summary would move more?",
+          shuffle: false,
+          options: [
+            { text: "The mean", correct: true, why: reveal },
+            { text: "The median", correct: false,
+              why: "The other way round: " + reveal },
+            { text: "Both by about the same amount", correct: false,
+              why: "Not here: " + reveal },
+            { text: "Neither would move", correct: false,
+              why: "The mean certainly does: " + reveal }
+          ]
+        };
+        predictSlot.appendChild(new H.Choices(q, function () {
+          ["move", "choose", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("The slider is now available below.");
+        }).el);
+        void s0;
+      }
+
+      /* ------------------------------------------------------------ render - */
+
+      function renderAll() {
+        var sc = state.sc, s = summary(sc, state.v);
+        vLab.textContent = "Highlighted " + sc.thing + " (" + u0(state.v) + ")";
+        renderPlot(s);
+        renderList(s);
+        renderReadout(s);
+        renderVerdict(s);
+        renderWorking(s);
+        renderWhy(s);
+      }
+
+      function renderList(s) {
+        var sc = state.sc;
+        listLine.innerHTML = "In order: " + s.sortedValues.map(function (v) {
+          return v === state.v ? "<strong>" + u0(v) + "</strong>" : u0(v);
+        }).join(" \u00B7 ") + ". The highlighted value is in bold; the middle value of the seven is " +
+          "the median.";
+      }
+
+      function renderReadout(s) {
+        readout.innerHTML = "<caption>Two summaries of the same seven " + state.sc.nounPl + "</caption>" +
+          "<tr><th scope='row'>Mean</th><td class='num'>" + u(s.mean) + "</td><td class='num'>" +
+          (state.v === state.sc.base[state.sc.focus] ? "\u2014" : signed(s.meanShift) + " from the start") +
+          "</td></tr>" +
+          "<tr><th scope='row'>Median</th><td class='num'>" + u(s.median) + "</td><td class='num'>" +
+          (state.v === state.sc.base[state.sc.focus] ? "\u2014" : signed(s.medianShift) + " from the start") +
+          "</td></tr>" +
+          "<tr><th scope='row'>Gap between them</th><td class='num'>" + u(s.gap) +
+          "</td><td class='num'></td></tr>";
+      }
+
+      function renderVerdict(s) {
+        var sc = state.sc;
+        var dm = Math.abs(s.meanShift), dmed = Math.abs(s.medianShift);
+        verdict.setAttribute("data-verdict", dm > dmed ? "ok" : "");
+        if (state.v === sc.base[sc.focus]) {
+          verdict.innerHTML = "<span class='verdict'>Starting position.</span> Mean " + u(s.mean) +
+            ", median " + u(s.median) + ". Move the slider and watch the two markers separate.";
+          return;
+        }
+        verdict.innerHTML = "<span class='verdict'>Mean " + signed(s.meanShift) + " \u00B7 median " +
+          signed(s.medianShift) + "</span> \u2014 " +
+          (dmed === 0
+            ? "the median has not moved at all, while the mean has travelled " + u(dm) + "."
+            : (dm > dmed
+              ? "the mean has moved " + (dm / dmed).toFixed(1) + " times as far as the median."
+              : "here the two have moved by similar amounts \u2014 the highlighted " + sc.noun +
+                " is still inside the pack, so it is affecting the ordering as well as the total."));
+        H.announce("Mean " + u(s.mean) + ", median " + u(s.median) + ".");
+      }
+
+      function renderWorking(s) {
+        var sc = state.sc;
+        working.innerHTML = "<strong>Mean:</strong> add the seven values and divide by seven \u2014 " +
+          u(s.values.reduce(function (a, b) { return a + b; }, 0), 0) + " \u00F7 7 = " + u(s.mean) +
+          ". <strong>Median:</strong> put them in order and read the fourth of seven \u2014 " +
+          u(s.median) + ".";
+      }
+
+      function renderWhy(s) {
+        why.innerHTML = "The mean uses every value directly, so an extreme observation can pull it " +
+          "toward that extreme. The median depends primarily on order and middle position, so the " +
+          "size of one extreme observation usually has much less influence \u2014 less sensitive, " +
+          "not immune: drag the highlighted " + state.sc.noun + " down through the others and the " +
+          "median moves too.";
+        void s;
+      }
+
+      /* Fixed axis: the whole slider range, so the outlier's travel is visible
+         and the picture never rescales underneath the student. */
+      function renderPlot(s) {
+        var sc = state.sc;
+        var W = 640, L = 24, R = 24, T = 30, B = 34, Ht = 130;
+        var pw = W - L - R;
+        var lo = sc.range[0] - (sc.range[1] - sc.range[0]) * 0.03;
+        var hi = sc.range[1] + (sc.range[1] - sc.range[0]) * 0.03;
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        while (plot.firstChild) plot.removeChild(plot.firstChild);
+        var y = T + 26;
+
+        line(plot, L, y + 22, L + pw, y + 22, "#131313", 1);
+        [0, 0.5, 1].forEach(function (f) {
+          var v = lo + f * (hi - lo);
+          line(plot, X(v), y + 22, X(v), y + 26, "#131313", 1);
+          txt(plot, X(v), y + 39, u(v, sc.axisDecimals), "11", "#6B6B6B", "middle");
+        });
+
+        // the seven observations
+        s.values.forEach(function (v, i) {
+          if (i === sc.focus) return;
+          plot.appendChild(svgEl("circle", { cx: X(v), cy: y, r: 5,
+            fill: "#FFFFFF", stroke: "#131313", "stroke-width": 1.4 }));
+        });
+        // the highlighted one: a square, plus a label
+        var fx = X(s.values[sc.focus]);
+        plot.appendChild(svgEl("rect", { x: fx - 6, y: y - 6, width: 12, height: 12,
+          fill: "#CFB991", stroke: "#131313", "stroke-width": 2 }));
+        txt(plot, fx, y - 12, "highlighted", "10", "#131313", "middle");
+
+        // mean: solid line with a filled triangle; median: dashed with an open one
+        marker(plot, X(s.mean), y, "mean " + u(s.mean), false);
+        marker(plot, X(s.median), y, "median " + u(s.median), true);
+
+        plotCap.textContent = "Seven " + sc.nounPl + " on a fixed scale. The highlighted " + sc.noun +
+          " is the gold square; the mean is the solid marker and the median the dashed, open one.";
+        plot.setAttribute("aria-label", "Number line of seven " + sc.nounPl + ". Values in order: " +
+          s.sortedValues.map(function (v) { return u(v, 0); }).join(", ") + ". Mean " + u(s.mean) +
+          ", median " + u(s.median) + ".");
+      }
+
+      function marker(svg, x, y, label, dashed) {
+        var top = y - 24, bottom = y + 16;
+        var a = { x1: x, y1: top, x2: x, y2: bottom, stroke: "#131313", "stroke-width": 1.5 };
+        if (dashed) a["stroke-dasharray"] = "4,3";
+        svg.appendChild(svgEl("line", a));
+        svg.appendChild(svgEl("polygon", {
+          points: x + "," + (top + 9) + " " + (x - 5) + "," + top + " " + (x + 5) + "," + top,
+          fill: dashed ? "#FFFFFF" : "#131313", stroke: "#131313", "stroke-width": 1.4
+        }));
+        txt(svg, x, top - 4, label, "11", "#131313", "middle");
+      }
+
+      /* ------------------------------------------------------ which summary */
+
+      function renderChoose() {
+        var sc = state.sc;
+        typicalSlot.innerHTML = "";
+        typicalSlot.appendChild(new H.Choices({
+          stem: sc.typicalQ,
+          options: [
+            { text: "The median", correct: true,
+              why: "The median may be more informative for describing the middle of this strongly " +
+                   "uneven set, because it is less sensitive to the unusually high observation. The " +
+                   "mean is not wrong; it answers a different descriptive question \u2014 see the " +
+                   "next one." },
+            { text: "The mean", correct: false,
+              why: "With one " + sc.noun + " far above the rest, the mean is pulled toward that value, " +
+                   "so it is a less informative answer to \u201Cwhat did a typical " + sc.noun +
+                   " look like\u201D. It is not wrong \u2014 it answers a different descriptive " +
+                   "question, as the next one shows." },
+            { text: "Either \u2014 they describe the same thing", correct: false,
+              why: "They describe different things. With one extreme value among seven, the gap " +
+                   "between them is the whole point of this module." }
+          ]
+        }).el);
+
+        totalSlot.innerHTML = "";
+        totalSlot.appendChild(new H.Choices({
+          stem: sc.totalQ,
+          options: [
+            { text: "The mean", correct: true, why: sc.totalWhy },
+            { text: "The median", correct: false,
+              why: "The median does not multiply up to a total: 100 \u00D7 the median is not the " +
+                   "expected total. " + sc.totalWhy },
+            { text: "Neither \u2014 you would need the individual values", correct: false,
+              why: "The individual values would be ideal, but the average is exactly what makes a " +
+                   "projection possible without them. " + sc.totalWhy }
+          ]
+        }).el);
+
+        meaning.innerHTML = "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What the two summaries do</strong>The mean uses every value directly. The " +
+          "median depends primarily on order and middle position, so the magnitude of an extreme " +
+          "endpoint has less influence.</div>" +
+          "<div><strong>What neither one is</strong>Neither is universally better. For strongly " +
+          "skewed data the two answer somewhat different descriptive questions, so the right choice " +
+          "follows from what is being asked. And an unusual observation is not automatically an " +
+          "error: it may be a valid case, a special situation, or a data-quality problem.</div>" +
+          "<div><strong>What a manager could reasonably do</strong>Report both when they disagree, " +
+          "and say why. A gap between the mean and the median is itself information about the shape " +
+          "of the data.</div></div>";
+      }
+
+      function line(svg, x1, y1, x2, y2, stroke, w) {
+        svg.appendChild(svgEl("line", { x1: x1, y1: y1, x2: x2, y2: y2,
+          stroke: stroke, "stroke-width": w }));
+      }
+      function txt(svg, x, y, s, size, fill, anchor) {
+        var n = svgEl("text", { x: x, y: y, "font-size": size, fill: fill, "text-anchor": anchor,
+          "font-family": "Segoe UI, Arial, sans-serif" });
+        n.textContent = s;
+        svg.appendChild(n);
+      }
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Regression Interpretation Trainer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: turning a regression coefficient into a defensible business sentence.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 7
+   "Regression Interpretation Trainer"
+
+   Fits beside Week 14 (Regression). This is a reading exercise, not a
+   calculator: the output is given, and the student turns one coefficient
+   into a sentence a manager could defend.
+
+   The course's own lines are the spine of the module:
+     "OLS uses COEFFICIENT(beta) ... Relationship, NOT CAUSE & EFFECT"
+     "We can predict only based on the range of predictors"
+     "R-Square evaluate the model; Beta denote the predict level"
+     "More Predictors = Higher R^2"
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ================================================================= math ==
+     Every displayed row is derived from a coefficient and a standard error:
+     t = b / SE, and p is the two-sided t tail on the model's residual df.
+     Nothing is hand-typed, so no row can be internally inconsistent.
+
+     The t tail uses the regularized incomplete beta (Lentz continued
+     fraction, Lanczos log-gamma) — the same helper as Modules 4 to 6,
+     duplicated here because those modules are frozen and this package has to
+     deploy on its own.
+     ====================================================================== */
+
+  function lnGamma(z) {
+    var g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+             -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+             9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+    z -= 1;
+    var x = 0.99999999999980993, i;
+    for (i = 0; i < 8; i++) x += g[i] / (z + i + 1);
+    var t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  function betacf(a, b, x) {
+    var MAXIT = 200, EPS = 3e-14, FPMIN = 1e-300;
+    var qab = a + b, qap = a + 1, qam = a - 1;
+    var c = 1, d = 1 - qab * x / qap, h, m, m2, aa, del;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    d = 1 / d; h = d;
+    for (m = 1; m <= MAXIT; m++) {
+      m2 = 2 * m;
+      aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; h *= d * c;
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; del = d * c; h *= del;
+      if (Math.abs(del - 1) < EPS) break;
+    }
+    return h;
+  }
+
+  function betai(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    var bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) +
+                      a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2)
+      ? bt * betacf(a, b, x) / a
+      : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+
+  function pTwoSided(t, df) {
+    if (!(df > 0) || !isFinite(t)) return null;
+    if (t === 0) return 1;
+    return betai(df / 2, 0.5, df / (df + t * t));
+  }
+
+  /* One coherent output row. b and SE are the only inputs; t and p follow. */
+  function stat(b, se, df) {
+    if (!isFinite(b) || !(se > 0) || !(df > 0)) return null;
+    var t = b / se;
+    return { b: b, se: se, df: df, t: t, p: pTwoSided(t, df) };
+  }
+
+  /* Rescaling the predictor's units multiplies b and SE by the same factor,
+     so t and p are untouched — the relationship did not change, only the
+     yardstick. */
+  function rescale(row, factor) {
+    return { b: row.b * factor, se: row.se * factor, df: row.df,
+             t: row.b / row.se, p: row.p };
+  }
+
+  var ALPHA = 0.05, AMBIGUOUS = 0.00055;
+
+  function fmtP(p) {
+    if (p === null || p === undefined) return "\u2014";
+    if (p < 0.001) return "p < .001";
+    if (p > 0.999) return "p > .999";
+    if (Math.abs(p - ALPHA) < AMBIGUOUS) return "p = " + p.toFixed(4).replace(/^0/, "");
+    return "p = " + p.toFixed(3).replace(/^0/, "");
+  }
+  function pOnly(p) { return fmtP(p).replace("p = ", "").replace("p ", ""); }
+
+  var core = { lnGamma: lnGamma, betai: betai, pTwoSided: pTwoSided,
+               stat: stat, rescale: rescale, fmtP: fmtP };
+
+  /* ============================================================= content ==
+     Three prevalidated models. Each row carries the words needed to build a
+     defensible sentence: what a one-unit change in the predictor is, and how
+     the outcome is measured.
+     ====================================================================== */
+
+  var SCENARIOS = [
+    {
+      id: "occupancy",
+      label: "Hotel — occupancy model",
+      outcome: "occupancy",
+      outcomeUnit: "percentage point",
+      outcomeUnitPlural: "percentage points",
+      n: 120, k: 3, r2: 0.42,
+      story: "A hotel company regresses monthly occupancy (measured in percent) on three predictors " +
+             "across 120 property-months. The output below is the result; your job is to read it.",
+      intercept: { name: "Intercept", b: 92.6, se: 3.9,
+                   meaning: "predicted occupancy when average daily rate and marketing spending are " +
+                            "both zero and there is no local event" ,
+                   plausible: false,
+                   why: "An average daily rate of $0 is outside anything this hotel has ever charged, " +
+                        "so the intercept here is an anchor for the fitted line rather than a number " +
+                        "with a business reading. The course puts the same caution on prediction: " +
+                        "predict only within the range of the predictors." },
+      rows: [
+        { id: "adr", name: "Average daily rate (per $10)", kind: "quant", b: -1.8, se: 0.62,
+          unitStep: "a $10 increase in average daily rate",
+          rescale: { factor: 10, label: "per $100", step: "a $100 increase in average daily rate" } },
+        { id: "mktg", name: "Marketing spending (per $1,000)", kind: "quant", b: 2.4, se: 1.75,
+          unitStep: "an additional $1,000 of marketing spending",
+          rescale: { factor: 10, label: "per $10,000", step: "an additional $10,000 of marketing spending" } },
+        { id: "event", name: "Local event (1 = yes)", kind: "dummy", b: 5.1, se: 1.55,
+          group: "months with a local event", reference: "months without one",
+          causalPhrase: "Bringing an event to town raises" }
+      ],
+      focus: "adr",
+      contrast: { big: "mktg", small: "adr" },
+      practical: "1.8 percentage points of occupancy on a 240-room property is roughly four rooms a " +
+                 "night — whether that is worth a rate change is a management judgement, not a " +
+                 "statistical one."
+    },
+    {
+      id: "sales",
+      label: "Restaurant — weekly sales model",
+      outcome: "weekly sales",
+      outcomeUnit: "thousand dollars",
+      outcomeUnitPlural: "thousand dollars",
+      n: 90, k: 3, r2: 0.38,
+      story: "A restaurant group regresses weekly sales (in thousands of dollars) on three predictors " +
+             "across 90 location-weeks. The highlighted row is an indicator variable, which is read " +
+             "differently from a quantitative predictor.",
+      intercept: { name: "Intercept", b: 18.4, se: 2.2,
+                   meaning: "predicted weekly sales at a menu price index of zero, no marketing " +
+                            "spending, and no weekend promotion (the reference category)",
+                   plausible: false,
+                   why: "A menu price index of zero is not a restaurant anyone operates. The intercept " +
+                        "positions the fitted line; it is not a forecast for a real week." },
+      rows: [
+        { id: "price", name: "Menu price index (per $1)", kind: "quant", b: 2.1, se: 1.75,
+          unitStep: "a $1 increase in the menu price index",
+          rescale: { factor: 5, label: "per $5", step: "a $5 increase in the menu price index" } },
+        { id: "mktg", name: "Marketing spending (per $1,000)", kind: "quant", b: 1.6, se: 0.42,
+          unitStep: "an additional $1,000 of marketing spending",
+          rescale: { factor: 10, label: "per $10,000", step: "an additional $10,000 of marketing spending" } },
+        { id: "promo", name: "Weekend promotion (1 = yes)", kind: "dummy", b: 3.4, se: 1.10,
+          group: "weeks running the weekend promotion", reference: "weeks without it",
+          causalPhrase: "Running the weekend promotion raises" }
+      ],
+      focus: "promo",
+      contrast: { big: "price", small: "mktg" },
+      practical: "$3,400 a week is real money at one location and rounding error across a portfolio — " +
+                 "the number only becomes important once someone attaches it to a decision."
+    },
+    {
+      id: "satisfaction",
+      label: "Hotel — satisfaction model with an interaction",
+      outcome: "guest satisfaction",
+      outcomeUnit: "point",
+      outcomeUnitPlural: "points",
+      n: 150, k: 3, r2: 0.31,
+      story: "A hotel regresses guest satisfaction (0 to 10) on check-in wait, loyalty membership, and " +
+             "the interaction between them, across 150 guests. The model includes an interaction, " +
+             "which changes how the wait coefficient may be read.",
+      intercept: { name: "Intercept", b: 7.2, se: 0.31,
+                   meaning: "predicted satisfaction for a non-member with a check-in wait of zero minutes",
+                   plausible: true,
+                   why: "A wait near zero is at least imaginable here, so the intercept is closer to " +
+                        "readable than in the other two models \u2014 but a wait of exactly zero still " +
+                        "sits at the edge of the observed range." },
+      rows: [
+        { id: "wait", name: "Check-in wait (per minute)", kind: "quant", b: -0.06, se: 0.021,
+          unitStep: "a one-minute longer check-in wait",
+          /* This predictor also appears in the interaction row, so its
+             coefficient is the slope for the reference category only, and its
+             units cannot be changed without rescaling the interaction row too.
+             Both consequences are handled explicitly below. */
+          interactsWith: "loyalty membership",
+          interactionRef: "non-members",
+          rescale: { factor: 10, label: "per 10 minutes", step: "a ten-minute longer check-in wait" } },
+        { id: "loyal", name: "Loyalty member (1 = yes)", kind: "dummy", b: 0.28, se: 0.13,
+          group: "loyalty members", reference: "non-members",
+          causalPhrase: "Signing a guest up for the loyalty programme raises" },
+        { id: "waitXloyal", name: "Wait \u00D7 Loyalty member", kind: "interaction", b: 0.03, se: 0.014,
+          partner: "loyalty membership" }
+      ],
+      focus: "wait",
+      contrast: { big: "loyal", small: "wait" },
+      practical: "0.06 of a point per minute is invisible on any one survey and adds up across a " +
+                 "queue \u2014 the decision depends on what a point of satisfaction is worth here."
+    }
+  ];
+
+  function df(sc) { return sc.n - sc.k - 1; }
+
+  /* Every row, computed. */
+  function model(sc) {
+    var d = df(sc);
+    return {
+      df: d, r2: sc.r2, n: sc.n, k: sc.k,
+      intercept: stat(sc.intercept.b, sc.intercept.se, d),
+      rows: sc.rows.map(function (r) {
+        var s = stat(r.b, r.se, d);
+        return { id: r.id, name: r.name, kind: r.kind, b: s.b, se: s.se, t: s.t, p: s.p, df: d, meta: r };
+      })
+    };
+  }
+
+  function rowById(m, id) {
+    return m.rows.filter(function (r) { return r.id === id; })[0];
+  }
+
+  /* The defensible sentence for one row, built from its own metadata. */
+  function sentenceFor(sc, row, opts) {
+    opts = opts || {};
+    var b = opts.b === undefined ? row.b : opts.b;
+    var step = opts.step || (row.meta.rescale && opts.rescaled ? row.meta.rescale.step : row.meta.unitStep);
+    var dir = b < 0 ? "lower" : "higher";
+    var mag = Math.abs(b);
+    var unit = mag === 1 ? sc.outcomeUnit : sc.outcomeUnitPlural;
+    var num = trimNum(mag);
+
+    if (row.kind === "dummy") {
+      return "Holding the other predictors in this model constant, " + row.meta.group +
+             " are associated with an estimated " + num + " " + unit + " " + dir + " " + sc.outcome +
+             " than " + row.meta.reference + ", the reference category.";
+    }
+    if (row.kind === "interaction") {
+      return "The interaction is what tells you the relationship differs: the estimated association " +
+             "between the other predictor and " + sc.outcome + " changes by " + num + " " + unit +
+             " for " + row.meta.partner + " compared with the reference category.";
+    }
+    if (row.meta.interactsWith && !opts.universal) {
+      return "For " + row.meta.interactionRef + ", the reference category, and holding the other " +
+             "included predictors constant, " + step + " is associated with an estimated " + num +
+             " " + unit + " " + dir + " " + sc.outcome + " in these data.";
+    }
+    return "Holding the other predictors in this model constant, " + step +
+           " is associated with an estimated " + num + " " + unit + " " + dir + " " + sc.outcome +
+           " in these data.";
+  }
+
+  function trimNum(x) {
+    var s = x.toFixed(Math.abs(x) < 0.5 ? 3 : 2);
+    return s.replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  core.scenarios = SCENARIOS;
+  core.model = model;
+  core.rowById = rowById;
+  core.sentenceFor = sentenceFor;
+  core.df = df;
+
+  global.HTM514_REG = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+
+  /* ========================================================== quick check == */
+
+  function quickCheck(sc) {
+    var m = model(sc);
+    return [
+      {
+        stem: "What does the sign of a regression coefficient tell you?",
+        options: [
+          { text: "The direction of the estimated association \u2014 whether the predicted outcome is " +
+                  "higher or lower as the predictor rises.", correct: true,
+            why: "Direction only. How much, and whether it matters, are separate questions answered by " +
+                 "the magnitude in its units and by the business context." },
+          { text: "Whether the predictor causes the outcome to rise or fall.", correct: false,
+            why: "The course is explicit about this: OLS is built on correlation, so it describes a " +
+                 "relationship, not cause and effect." },
+          { text: "How strong the relationship is.", correct: false,
+            why: "Strength is not in the sign. A tiny negative coefficient and a large negative one " +
+                 "share a sign." }
+        ]
+      },
+      {
+        stem: "The same predictor is re-expressed from $1,000 units to $10,000 units and the " +
+              "coefficient becomes ten times larger. Did the relationship get stronger?",
+        options: [
+          { text: "No \u2014 only the yardstick changed. The t statistic and p-value are identical.",
+            correct: true,
+            why: "The coefficient and its standard error are multiplied by the same factor, so their " +
+                 "ratio is unchanged. This is why a coefficient means nothing until you know the units." },
+          { text: "Yes \u2014 a larger coefficient means a stronger relationship.", correct: false,
+            why: "Then you could make any relationship look stronger by measuring the predictor in " +
+                 "smaller units. Magnitude is only readable alongside the unit." },
+          { text: "Yes, but only if the p-value also fell.", correct: false,
+            why: "The p-value does not move at all under rescaling \u2014 try it in the panel above." }
+        ]
+      },
+      {
+        stem: "What does \u201Cholding the other predictors in this model constant\u201D actually describe?",
+        options: [
+          { text: "The conditional comparison represented by the fitted model \u2014 among the " +
+                  "predictors it includes.", correct: true,
+            why: "It is a statement about the model, not about the world. Anything left out of the " +
+                 "model is not being held constant by it." },
+          { text: "That all confounding has been removed.", correct: false,
+            why: "Only the included predictors are adjusted for. The course's own assumption list " +
+                 "warns that the primary danger is a model omitting a critical predictor." },
+          { text: "That the other predictors were physically fixed when the data were collected.",
+            correct: false,
+            why: "In observational data nothing was fixed. The adjustment happens in the estimation, " +
+                 "not in the world." }
+        ]
+      },
+      {
+        stem: "A coefficient has p < .05. Does that make it managerially important?",
+        options: [
+          { text: "No \u2014 the p-value describes statistical evidence against a zero-coefficient null " +
+                  "under the model, not the size or value of the estimate.", correct: true,
+            why: sc.practical },
+          { text: "Yes \u2014 significant means the predictor matters.", correct: false,
+            why: "Significant means the data are hard to reconcile with a coefficient of exactly zero. " +
+                 "Whether the estimated size is worth acting on is a separate judgement." },
+          { text: "Yes, if the coefficient is also large.", correct: false,
+            why: "Large in what units? Magnitude is only interpretable once the unit and the business " +
+                 "context are attached." }
+        ]
+      },
+      {
+        stem: "One coefficient in the table is numerically the largest. Does that make it the most " +
+              "statistically significant?",
+        options: [
+          { text: "No \u2014 evidence depends on the coefficient relative to its standard error, not on " +
+                  "its raw size.", correct: true,
+            why: "Not necessarily. Statistical evidence depends on the coefficient relative to its " +
+                 "standard error: t = b / SE. A larger raw coefficient can have weaker evidence when " +
+                 "its uncertainty is also larger." },
+          { text: "Yes \u2014 bigger coefficients give smaller p-values.", correct: false,
+            why: "Only if the standard error stays put. Compare the two highlighted rows in the manager " +
+                 "checkpoint above." },
+          { text: "Yes, provided all predictors use the same units.", correct: false,
+            why: "Even then it is the ratio to the standard error that drives the p-value." }
+        ]
+      },
+      {
+        stem: "This model reports R\u00B2 = ." + String(Math.round(sc.r2 * 100)) + ". What does that mean?",
+        options: [
+          { text: "About " + Math.round(sc.r2 * 100) + "% of the observed variation in " + sc.outcome +
+                  " is explained by the predictors included in this model.", correct: true,
+            why: "The course's Venn picture says the same thing: the predictors together account for " +
+                 "that share of the criterion's variance." },
+          { text: "The model is " + Math.round(sc.r2 * 100) + "% accurate.", correct: false,
+            why: "R\u00B2 is a share of variation explained, not an accuracy rate. It says nothing about " +
+                 "how far any individual prediction lands from the truth." },
+          { text: "There is a " + Math.round(sc.r2 * 100) + "% probability the model is correct.",
+            correct: false,
+            why: "R\u00B2 is not a probability, and no statistic assigns one to a model being correct." }
+        ]
+      },
+      {
+        stem: "Is a higher R\u00B2 always a better model?",
+        options: [
+          { text: "No \u2014 adding predictors can only raise R\u00B2, and a model can fit well and still " +
+                  "be the wrong tool for the question.", correct: true,
+            why: "The lecture makes the first point directly: more predictors means a higher R\u00B2. " +
+                 "That is why fit alone does not settle whether a model is good." },
+          { text: "Yes \u2014 higher R\u00B2 always means a better model.", correct: false,
+            why: "Then the best model would be the one with the most predictors, useful or not." },
+          { text: "Yes, as long as every coefficient is significant.", correct: false,
+            why: "Fit and significance both describe the model's relationship to this sample, not " +
+                 "whether it answers the question being asked." }
+        ]
+      },
+      {
+        stem: "What does the intercept represent in this model?",
+        options: [
+          { text: "The predicted outcome when every quantitative predictor is zero and each indicator " +
+                  "is at its reference category.", correct: true,
+            why: "Whether that combination is a real situation is a separate question \u2014 here it is " +
+                 (sc.intercept.plausible ? "close to plausible." : "not.") },
+          { text: "The average value of the outcome in the data.", correct: false,
+            why: "That would only coincide if every predictor happened to average zero." },
+          { text: "The part of the outcome the model cannot explain.", correct: false,
+            why: "That is the residual, not the intercept." }
+        ]
+      },
+      {
+        stem: "A binary indicator has a coefficient of " + trimNum(rowById(m, sc.rows.filter(
+              function (r) { return r.kind === "dummy"; })[0].id).b) +
+              ". How is it read?",
+        options: [
+          { text: "As the estimated difference from the reference category, holding the other " +
+                  "predictors constant.", correct: true,
+            why: "Although 0 \u2192 1 is numerically a one-unit change, an indicator coefficient is " +
+                 "most clearly interpreted as the estimated difference between the indicated group and " +
+                 "the reference category, holding the other included predictors constant." },
+          { text: "As the change in the outcome for a one-unit increase in the indicator.", correct: false,
+            why: "Mechanically that phrasing produces the right number, but it hides what the model is " +
+                 "doing: comparing a group with the reference group." },
+          { text: "As the outcome level for that group.", correct: false,
+            why: "It is a difference, not a level. The level would also need the intercept and every " +
+                 "other predictor." }
+        ]
+      },
+      {
+        stem: "Does a regression coefficient establish that the predictor causes the outcome?",
+        options: [
+          { text: "No \u2014 it estimates a conditional association among the included predictors.",
+            correct: true,
+            why: "The course states it flatly: OLS is based on the correlation relationship \u2014 " +
+                 "relationship, not cause and effect. A causal claim needs a design and assumptions " +
+                 "regression alone does not supply." },
+          { text: "Yes, once the other predictors are held constant.", correct: false,
+            why: "Adjustment describes a conditional comparison among the variables in the model. " +
+                 "It cannot account for what was left out." },
+          { text: "Yes, if the p-value is small enough.", correct: false,
+            why: "A small p-value says the association is hard to explain by sampling variation alone. " +
+                 "It says nothing about what produced it." }
+        ]
+      },
+      {
+        stem: "Two models report the same coefficient but different standard errors. Why do their " +
+              "p-values differ?",
+        options: [
+          { text: "Because t = b / SE \u2014 the same estimate with more uncertainty is weaker evidence.",
+            correct: true,
+            why: "The estimate is identical; what changed is how precisely it was pinned down. That is " +
+                 "the third variant button above." },
+          { text: "Because one of the two coefficients must be wrong.", correct: false,
+            why: "Both can be correct. A wider standard error usually means a smaller sample or noisier " +
+                 "data, not an error." },
+          { text: "Because the sample sizes must differ.", correct: false,
+            why: "Sample size is one thing that moves a standard error, but the p-value follows from " +
+                 "the ratio b / SE and the degrees of freedom regardless of why SE changed." }
+        ]
+      }
+    ];
+  }
+
+  /* =============================================================== page === */
+
+  var pageModule = {
+    title: "What does this coefficient actually say?",
+    subtitle: "Reading a regression output and turning one number into a sentence a manager could defend.",
+    courseFit: "Optional practice for Week 14 (Regression \u2014 OLS, coefficients, R\u00B2, dummy " +
+               "variables, interactions). About 8 minutes. Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { sc: SCENARIOS[0], m: null, variant: "base" };
+
+      /* --- step 1: the model ---------------------------------------------- */
+      var s1 = steps.add({ id: "model", title: "The model" });
+      var story = h("p", { class: "scenario-text" });
+      var outBox = h("div", { class: "chart-box" });
+      var outTable = h("table", { class: "readout" });
+      outBox.appendChild(outTable);
+      var outCap = h("p", { class: "cap" });
+      outBox.appendChild(outCap);
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a model",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(outBox);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Model" }), picker])
+      ]));
+
+      /* --- step 2: interpret the highlighted coefficient -------------------- */
+      var s2 = steps.add({
+        id: "interpret", title: "Interpret the highlighted row",
+        hint: "One of these sentences is one you could put in front of a manager. The others each break " +
+              "in a specific way."
+      });
+      var interpretSlot = h("div");
+      s2.body.appendChild(interpretSlot);
+
+      /* --- step 3: change the result ---------------------------------------- */
+      var s3 = steps.add({
+        id: "change", title: "Change one thing", locked: true,
+        hint: "Each version below is a complete, coherent output row \u2014 t and p follow from the " +
+              "coefficient and its standard error, they are not typed in."
+      });
+      var variantBtns = h("div", { class: "controls" });
+      s3.body.appendChild(variantBtns);
+      var variantRow = h("table", { class: "readout" });
+      s3.body.appendChild(variantRow);
+      var variantSay = h("div", { class: "feedback" });
+      s3.body.appendChild(variantSay);
+      var variantWhy = h("p", { class: "hint" });
+      s3.body.appendChild(variantWhy);
+
+      /* --- step 4: read the model ------------------------------------------- */
+      var s4 = steps.add({ id: "read", title: "Read the rest of the model", locked: true });
+      var r2Slot = h("div");
+      var interceptSlot = h("div");
+      s4.body.appendChild(r2Slot);
+      s4.body.appendChild(interceptSlot);
+
+      /* --- step 5: manager checkpoint ---------------------------------------- */
+      var s5 = steps.add({ id: "manager", title: "Manager checkpoint", locked: true });
+      var contrastBox = h("div", { class: "panel" });
+      s5.body.appendChild(contrastBox);
+      var causeSlot = h("div");
+      s5.body.appendChild(causeSlot);
+      var extraSlot = h("div");
+      s5.body.appendChild(extraSlot);
+      var meaning = h("div", { class: "panel" });
+      s5.body.appendChild(meaning);
+
+      /* --- step 6: quick check ------------------------------------------------ */
+      var s6 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s6.body.appendChild(checkSlot);
+      s6.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another model",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-model").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* ----------------------------------------------------------- helpers - */
+
+      function focusRow() { return rowById(state.m, state.sc.focus); }
+      function num(x) { return trimNum(x); }
+      function se3(x) { return x.toFixed(x < 0.1 ? 4 : 2); }
+
+      /* ----------------------------------------------------------- scenario - */
+
+      function setScenario(id) {
+        state.sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.m = model(state.sc);
+        state.variant = "base";
+        story.textContent = state.sc.story;
+        renderOutput();
+        renderInterpret();
+        renderVariants();
+        renderRead();
+        renderManager();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(state.sc), 714).el);
+        ["change", "read", "manager", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      function renderOutput() {
+        var sc = state.sc, m = state.m;
+        var head = "<caption>Regression output \u2014 outcome: " + sc.outcome + " (n = " + sc.n +
+          ", residual df = " + m.df + ")</caption>" +
+          "<tr><th scope='col'>Predictor</th><th scope='col'>Coefficient</th>" +
+          "<th scope='col'>Std. error</th><th scope='col'>t</th><th scope='col'>p</th></tr>";
+        var body = "<tr><th scope='row'>" + sc.intercept.name + "</th><td class='num'>" +
+          num(m.intercept.b) + "</td><td class='num'>" + se3(m.intercept.se) + "</td><td class='num'>" +
+          m.intercept.t.toFixed(2) + "</td><td class='num'>" + pOnly(m.intercept.p) + "</td></tr>";
+        m.rows.forEach(function (r) {
+          var on = r.id === sc.focus;
+          body += "<tr" + (on ? " style='background:#F7F3EA'" : "") + "><th scope='row'>" +
+            (on ? "\u25B8 " : "") + r.name + (on ? " (highlighted)" : "") + "</th><td class='num'>" +
+            num(r.b) + "</td><td class='num'>" + se3(r.se) + "</td><td class='num'>" +
+            r.t.toFixed(2) + "</td><td class='num'>" + pOnly(r.p) + "</td></tr>";
+        });
+        body += "<tr><th scope='row'>R\u00B2</th><td colspan='4'>" +
+          sc.r2.toFixed(2).replace(/^0/, "") + "</td></tr>";
+        outTable.innerHTML = head + body;
+        outCap.textContent = "The highlighted row is marked with an arrow and the word \u201C" +
+          "highlighted\u201D, not by shading alone. Every t is the coefficient divided by its standard " +
+          "error, and every p follows from that t on " + m.df + " degrees of freedom.";
+      }
+
+      function renderInterpret() {
+        var sc = state.sc, row = focusRow();
+        interpretSlot.innerHTML = "";
+        var right = sentenceFor(sc, row);
+        var opts;
+
+        if (row.kind === "dummy") {
+          opts = [
+            { text: right, correct: true,
+              why: "It names the comparison group, the reference category, the estimated size with its " +
+                   "unit, and it says <em>associated with</em> rather than <em>causes</em>." },
+            { text: "A one-unit increase in " + row.name.replace(/ \(1 = yes\)/, "") +
+                    " is associated with an estimated " + num(row.b) + " " + sc.outcomeUnitPlural +
+                    " higher " + sc.outcome + ".", correct: false,
+              why: "Although 0 \u2192 1 is numerically a one-unit change, this coefficient is most " +
+                   "clearly read as the estimated difference between the indicated group and the " +
+                   "reference category, holding the other included predictors constant. The " +
+                   "one-unit phrasing gets the arithmetic right and hides what is being compared." },
+            { text: row.meta.causalPhrase + " " + sc.outcome + " by " + num(row.b) + " " +
+                    sc.outcomeUnitPlural + ".", correct: false,
+              why: "\u201CRaises\u201D is a causal claim. The course is explicit that OLS gives a " +
+                   "relationship, not cause and effect." },
+            { text: right.replace("Holding the other predictors in this model constant, ", ""),
+              correct: false,
+              why: "Everything else is right, but dropping <em>holding the other predictors constant</em> " +
+                   "changes what is being claimed: this is a conditional comparison inside a model with " +
+                   "three predictors, not a raw group difference." }
+          ];
+        } else {
+          opts = [
+            { text: right, correct: true,
+              why: "It names the unit of the predictor, the size and unit of the estimated change, the " +
+                   "conditioning, and it stays with <em>associated with</em>." },
+            { text: sc.outcome.charAt(0).toUpperCase() + sc.outcome.slice(1) + " " +
+                    (row.b < 0 ? "falls" : "rises") + " by " + num(Math.abs(row.b)) +
+                    (sc.id === "occupancy" ? "%" : " " + sc.outcomeUnitPlural) + " for " +
+                    row.meta.unitStep + ".", correct: false,
+              why: sc.id === "occupancy"
+                ? "Two problems. It reads as a guaranteed change rather than an estimated association, " +
+                  "and it says <em>%</em> when the outcome is measured in percent \u2014 a move of 1.8 " +
+                  "<em>percentage points</em> is not a 1.8 <em>percent</em> change."
+                : "It reads as a guaranteed change rather than an estimated association, and it drops " +
+                  "the conditioning on the other predictors in the model." },
+            { text: "Because p = " + pOnly(row.p) + ", " + row.meta.unitStep +
+                    " is " + (row.p < 0.05 ? "an important driver of " : "irrelevant to ") + sc.outcome + ".",
+              correct: false,
+              why: "The p-value describes statistical evidence against a zero-coefficient null under " +
+                   "this model. It does not measure importance, and a large p-value does not show a " +
+                   "coefficient is zero." },
+            (row.meta.interactsWith
+              ? { text: sentenceFor(sc, row, { universal: true }), correct: false,
+                  why: "This is the sentence you would write if the model had no interaction — and " +
+                       "it is the most common mistake here. Because " + row.name.replace(/ \(.*/, "") +
+                       " also appears in the " + row.meta.interactsWith + " interaction, this " +
+                       "coefficient is the slope for " + row.meta.interactionRef + ", the reference " +
+                       "category. For the other group the estimated slope is this coefficient plus the " +
+                       "interaction coefficient." }
+              : { text: right.replace("Holding the other predictors in this model constant, ", "") +
+                        " This holds for every case regardless of the other predictors.", correct: false,
+                  why: "The sentence is fine until the last clause. The estimate is a conditional " +
+                       "comparison inside this model, not a universal rule." })
+          ];
+        }
+
+        interpretSlot.appendChild(new H.Choices({
+          stem: "The highlighted coefficient is <strong>" + num(row.b) + "</strong> (" + row.name +
+                "), with " + fmtP(row.p) + ". Which sentence would you put in a report?",
+          options: opts
+        }, function () {
+          ["change", "read", "manager", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("The variants are now available below.");
+        }).el);
+      }
+
+      /* --------------------------------------------------------- variants - */
+
+      function variants() {
+        var sc = state.sc, row = focusRow();
+        var list = [
+          { id: "base", label: "As reported",
+            row: { b: row.b, se: row.se, t: row.t, p: row.p },
+            note: "The row exactly as the model reported it." },
+          { id: "sign", label: "Sign flipped",
+            row: { b: -row.b, se: row.se, t: -row.t, p: row.p },
+            note: "Only the sign changed. The magnitude, the standard error, the size of t and the " +
+                  "p-value are all identical \u2014 the direction of the association reversed, and " +
+                  "nothing about the strength of the evidence did." },
+          { id: "se", label: "More uncertainty",
+            row: (function () { var s = stat(row.b, row.se * 2.2, row.df); return s; })(),
+            note: "Same estimate, a standard error more than twice as wide. t = b / SE falls, so the " +
+                  "evidence against a zero coefficient weakens \u2014 without the estimate itself " +
+                  "moving at all." }
+        ];
+        if (row.meta.rescale && !row.meta.interactsWith) {
+          list.splice(2, 0, {
+            id: "units", label: "Different units (" + row.meta.rescale.label + ")",
+            row: (function () {
+              var r = rescale(row, row.meta.rescale.factor);
+              return { b: r.b, se: r.se, t: row.t, p: row.p };
+            })(),
+            rescaled: true,
+            note: "The coefficient and its standard error are both multiplied by " +
+                  row.meta.rescale.factor + ", so t and p do not move by even a thousandth. The " +
+                  "relationship is the same; the yardstick changed."
+          });
+        } else if (row.meta.interactsWith) {
+          list.splice(2, 0, {
+            id: "units", label: "Different units?", row: null,
+            refusal: "Because this predictor also appears in an interaction, changing its units would " +
+                     "require rescaling both the main-effect and interaction rows.",
+            note: "Because this predictor also appears in an interaction, changing its units would " +
+                  "require rescaling both the main-effect and interaction rows. Try the unit exercise " +
+                  "in another model."
+          });
+        } else {
+          list.splice(2, 0, {
+            id: "units", label: "Different units?", row: null,
+            refusal: "This row is an indicator: it is already a comparison between two categories, so " +
+                     "there are no units to double or divide.",
+            note: "Rescaling does not apply here. This row is an indicator: it is already a comparison " +
+                  "between two categories, so there are no units to double or divide."
+          });
+        }
+        return list;
+      }
+
+      function renderVariants() {
+        var sc = state.sc, row = focusRow(), list = variants();
+        variantBtns.innerHTML = "";
+        list.forEach(function (v) {
+          variantBtns.appendChild(h("button", {
+            type: "button", "data-variant": v.id, text: v.label,
+            "aria-pressed": v.id === state.variant ? "true" : "false",
+            class: v.id === state.variant ? "primary" : "",
+            onclick: function () { state.variant = v.id; renderVariants(); }
+          }));
+        });
+        var v = list.filter(function (x) { return x.id === state.variant; })[0];
+        if (!v.row) {
+          variantRow.innerHTML = "<caption>" + row.name + "</caption>" +
+            "<tr><td>" + v.refusal + "</td></tr>";
+          variantSay.setAttribute("data-verdict", "");
+          variantSay.innerHTML = "<span class='verdict'>Nothing to rescale.</span> " +
+            sentenceFor(sc, row);
+        } else {
+          variantRow.innerHTML = "<caption>" + row.name +
+            (v.rescaled ? " \u2014 " + v.label : "") + "</caption>" +
+            "<tr><th scope='col'>Coefficient</th><th scope='col'>Std. error</th>" +
+            "<th scope='col'>t</th><th scope='col'>p</th></tr>" +
+            "<tr><td class='num'>" + num(v.row.b) + "</td><td class='num'>" + se3(v.row.se) +
+            "</td><td class='num'>" + v.row.t.toFixed(2) + "</td><td class='num'>" +
+            pOnly(v.row.p) + "</td></tr>";
+          variantSay.setAttribute("data-verdict", "ok");
+          variantSay.innerHTML = "<span class='verdict'>Say it like this:</span> " +
+            sentenceFor(sc, row, { b: v.row.b, rescaled: !!v.rescaled });
+        }
+        variantWhy.innerHTML = v.note;
+        H.announce(v.label + " selected.");
+      }
+
+      /* ------------------------------------------------------ read the model */
+
+      function renderRead() {
+        var sc = state.sc, m = state.m, pct = Math.round(sc.r2 * 100);
+        r2Slot.innerHTML = "";
+        r2Slot.appendChild(new H.Choices({
+          stem: "This model reports <strong>R\u00B2 = " + sc.r2.toFixed(2).replace(/^0/, "") +
+                "</strong>. Which reading is right?",
+          options: [
+            { text: "About " + pct + "% of the observed variation in " + sc.outcome +
+                    " is explained by the predictors included in this model.", correct: true,
+              why: "And one caution the lecture makes directly: more predictors can only push R\u00B2 " +
+                   "up, so a higher R\u00B2 does not automatically mean a better model for the question " +
+                   "you are asking." },
+            { text: "The model is " + pct + "% accurate.", correct: false,
+              why: "R\u00B2 is a share of variation explained, not an accuracy rate. It says nothing " +
+                   "about how far a single prediction lands from what actually happened." },
+            { text: "The predictors cause " + pct + "% of " + sc.outcome + ".", correct: false,
+              why: "Explained variation is not caused variation. R\u00B2 is computed from the same " +
+                   "correlational fit as the coefficients." },
+            { text: "There is a " + pct + "% probability that the model is correct.", correct: false,
+              why: "R\u00B2 is not a probability and nothing here assigns one to a model being right." }
+          ]
+        }).el);
+
+        interceptSlot.innerHTML = "";
+        interceptSlot.appendChild(new H.Choices({
+          stem: "The intercept is <strong>" + num(m.intercept.b) + "</strong>. What is it?",
+          options: [
+            { text: "The predicted " + sc.outcome + " when every quantitative predictor equals zero " +
+                    "and each indicator is at its reference category.", correct: true,
+              why: "Mechanically right \u2014 and worth one more step: " + sc.intercept.why },
+            { text: "The average " + sc.outcome + " across the sample.", correct: false,
+              why: "That would coincide only if every predictor averaged exactly zero." },
+            { text: "The share of " + sc.outcome + " the predictors cannot explain.", correct: false,
+              why: "That is the residual variation, which R\u00B2 speaks to \u2014 not the intercept." }
+          ]
+        }).el);
+      }
+
+      /* ---------------------------------------------------------- manager - */
+
+      function renderManager() {
+        var sc = state.sc, m = state.m;
+        var big = rowById(m, sc.contrast.big), small = rowById(m, sc.contrast.small);
+        contrastBox.innerHTML = "<h3>Two rows worth comparing</h3>" +
+          "<table class='readout'><tr><th scope='col'>Predictor</th><th scope='col'>Coefficient</th>" +
+          "<th scope='col'>Std. error</th><th scope='col'>p</th></tr>" +
+          "<tr><th scope='row'>" + big.name + "</th><td class='num'>" + num(big.b) + "</td>" +
+          "<td class='num'>" + se3(big.se) + "</td><td class='num'>" + pOnly(big.p) + "</td></tr>" +
+          "<tr><th scope='row'>" + small.name + "</th><td class='num'>" + num(small.b) + "</td>" +
+          "<td class='num'>" + se3(small.se) + "</td><td class='num'>" + pOnly(small.p) + "</td></tr>" +
+          "</table><p>Neither number by itself settles which matters more to the business. The " +
+          "coefficients are in different units, so their sizes are not comparable as printed; and the " +
+          "p-values describe statistical evidence relative to each estimate's uncertainty, not " +
+          "managerial value. " + sc.practical + "</p>";
+
+        causeSlot.innerHTML = "";
+        var focus = rowById(m, sc.focus);
+        causeSlot.appendChild(new H.Choices({
+          stem: "The highlighted coefficient is " + num(focus.b) + " with " + fmtP(focus.p) +
+                ". Which conclusion is justified <em>from this regression alone</em>?",
+          options: [
+            { text: "Within these data, " + (focus.kind === "dummy" ? focus.meta.group : "higher values " +
+                    "of this predictor") + " are associated with " + (focus.b < 0 ? "lower " : "higher ") +
+                    sc.outcome + ", conditional on the other predictors in the model" +
+                    (focus.meta.interactsWith
+                      ? " and, because of the interaction, for " + focus.meta.interactionRef +
+                        " \u2014 the reference category." : ".") , correct: true,
+              why: "It stays with what the model estimates: a conditional association among the " +
+                   "included variables" + (focus.meta.interactsWith
+                        ? ", and for the group this coefficient actually describes." : ".") },
+            { text: "Changing this predictor would move " + sc.outcome + " by exactly " +
+                    num(Math.abs(focus.b)) + " " + sc.outcomeUnitPlural + ".", correct: false,
+              why: "Two claims at once, and both go beyond the output: that an intervention would " +
+                   "produce this change, and that it would be exact rather than estimated with error." },
+            { text: "The regression has ruled out other explanations for the pattern.", correct: false,
+              why: "It has adjusted for the predictors it includes. Anything omitted is not accounted " +
+                   "for \u2014 the course's assumption list calls a missing critical predictor the " +
+                   "primary danger." }
+          ]
+        }).el);
+
+        extraSlot.innerHTML = "";
+        var inter = m.rows.filter(function (r) { return r.kind === "interaction"; })[0];
+        if (inter) {
+          extraSlot.appendChild(new H.Choices({
+            stem: "This model includes <strong>" + inter.name + "</strong>. Can the check-in wait " +
+                  "coefficient on its own describe the wait relationship for every guest?",
+            options: [
+              { text: "No \u2014 with an interaction in the model, the wait relationship depends on " +
+                      "loyalty membership.", correct: true,
+                why: "The wait coefficient describes the reference category. For members the estimated " +
+                     "relationship is that coefficient plus the interaction term, so a single number " +
+                     "cannot stand for both groups." },
+              { text: "Yes \u2014 the interaction is a separate effect and does not change the wait " +
+                      "coefficient's meaning.", correct: false,
+                why: "It changes it precisely. Once the product term is in the model, the wait " +
+                     "coefficient is conditional on the other variable being at its reference value." },
+              { text: "Yes, as long as the interaction is statistically significant.", correct: false,
+                why: "Significance does not make a conditional estimate universal. It is the presence " +
+                     "of the product term that makes the relationship depend on the second variable." }
+            ]
+          }).el);
+        }
+
+        meaning.innerHTML = "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What a coefficient means</strong>An estimated difference in " + sc.outcome +
+          " associated with a stated change in the predictor, holding the other predictors in this " +
+          "model constant \u2014 in the units both variables are measured in." +
+          (m.rows.some(function (r) { return r.kind === "interaction"; })
+            ? " In this model one predictor also appears in an interaction, so its coefficient is the " +
+              "estimate for the reference category of the other variable, not a single slope for " +
+              "everyone."
+            : "") + "</div>" +
+          "<div><strong>What it does not mean</strong>Not a causal effect: the course's own line is " +
+          "that OLS gives relationship, not cause and effect. Not a guaranteed change for any single " +
+          "case. Not a claim outside the observed range of the predictors. And a p-value does not " +
+          "measure importance \u2014 a nonsignificant coefficient has not been shown to be zero.</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>\u201CIn these data, and " +
+          "adjusting for the other predictors in the model, " + sc.outcome + " differs in the direction " +
+          "and rough size the coefficient reports. Whether that is worth acting on, and whether acting " +
+          "would produce it, are separate questions.\u201D</div></div>";
+      }
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

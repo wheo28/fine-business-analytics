@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — ANOVA Concept Explorer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: how one-way ANOVA weighs differences among group means against the variation inside the groups.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 6
+   "ANOVA Concept Explorer"
+
+   Fits beside Week 13 (ANOVA, Ch. 18). One idea only, and it is the deck's
+   own contrast: "slightly different means with respect to fairly large
+   variances" against "very different means with respect to fairly small
+   variances". F weighs BETWEEN against WITHIN.
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ================================================================= math ==
+     Regularized incomplete beta (Lentz continued fraction, Lanczos
+     log-gamma), as in Modules 4 and 5 and duplicated here deliberately so
+     this package deploys on its own. The upper-tail F probability is
+
+         P(F > f) = I_x(d2/2, d1/2),  x = d2 / (d2 + d1*f)
+
+     which is exact, not an approximation. Validated in tests against the
+     closed form available at d1 = 2, against published F critical values,
+     and against the t distribution through F = t^2 at d1 = 1.
+     ====================================================================== */
+
+  function lnGamma(z) {
+    var g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+             -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+             9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+    z -= 1;
+    var x = 0.99999999999980993, i;
+    for (i = 0; i < 8; i++) x += g[i] / (z + i + 1);
+    var t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  function betacf(a, b, x) {
+    var MAXIT = 200, EPS = 3e-14, FPMIN = 1e-300;
+    var qab = a + b, qap = a + 1, qam = a - 1;
+    var c = 1, d = 1 - qab * x / qap, h, m, m2, aa, del;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    d = 1 / d; h = d;
+    for (m = 1; m <= MAXIT; m++) {
+      m2 = 2 * m;
+      aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; h *= d * c;
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; del = d * c; h *= del;
+      if (Math.abs(del - 1) < EPS) break;
+    }
+    return h;
+  }
+
+  function betai(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    var bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) +
+                      a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2)
+      ? bt * betacf(a, b, x) / a
+      : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+
+  /* Upper-tail probability of the F distribution. */
+  function pF(f, d1, d2) {
+    if (!(d1 > 0) || !(d2 > 0) || !isFinite(f)) return null;
+    if (f <= 0) return 1;
+    return betai(d2 / 2, d1 / 2, d2 / (d2 + d1 * f));
+  }
+
+  function mean(a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; }
+
+  /* One-way ANOVA on k groups of raw observations. Returns null only for
+     input that is not a usable design; a zero within-group sum of squares is
+     reported as a flagged state rather than as an infinite F. */
+  function anova(groups) {
+    if (!groups || groups.length < 2) return null;
+    var k = groups.length, N = 0, i, j;
+    for (i = 0; i < k; i++) {
+      if (!groups[i] || groups[i].length < 1) return null;
+      N += groups[i].length;
+    }
+    if (N - k < 1) return null;
+
+    var means = groups.map(mean);
+    var all = [];
+    for (i = 0; i < k; i++) for (j = 0; j < groups[i].length; j++) all.push(groups[i][j]);
+    var grand = mean(all);
+
+    var ssB = 0, ssW = 0, d;
+    for (i = 0; i < k; i++) {
+      d = means[i] - grand;
+      ssB += groups[i].length * d * d;
+      for (j = 0; j < groups[i].length; j++) {
+        d = groups[i][j] - means[i];
+        ssW += d * d;
+      }
+    }
+    var dfB = k - 1, dfW = N - k;
+    var msB = ssB / dfB, msW = ssW / dfW;
+
+    if (msW === 0) {
+      // Every observation equals its own group mean. F is 0/0 when the group
+      // means also agree and unbounded otherwise: no test, reported honestly.
+      return { k: k, N: N, means: means, grand: grand, ssB: ssB, ssW: 0,
+               dfB: dfB, dfW: dfW, msB: msB, msW: 0, F: null, p: null,
+               reject: null, degenerate: true };
+    }
+    var F = msB / msW;
+    var p = pF(F, dfB, dfW);
+    return { k: k, N: N, means: means, grand: grand, ssB: ssB, ssW: ssW,
+             dfB: dfB, dfW: dfW, msB: msB, msW: msW, F: F, p: p,
+             reject: p < 0.05, degenerate: false };
+  }
+
+  /* Display rule. The decision always uses the unrounded value; this only
+     prints. Inside the band where three decimals would round to .050 — and so
+     could sit on either side of alpha while looking identical — a fourth
+     decimal is shown so the number never appears to contradict the verdict. */
+  /* Slightly wider than the .0495-.0505 rounding zone so binary representation
+     at the edges cannot leak a ".050" through. */
+  var ALPHA = 0.05, AMBIGUOUS = 0.00055;
+
+  function fmtP(p) {
+    if (p === null) return "\u2014";
+    if (p < 0.001) return "p < .001";
+    if (p > 0.999) return "p > .999";
+    if (Math.abs(p - ALPHA) < AMBIGUOUS) return "p = " + p.toFixed(4).replace(/^0/, "");
+    return "p = " + p.toFixed(3).replace(/^0/, "");
+  }
+
+  var core = { lnGamma: lnGamma, betai: betai, pF: pF, anova: anova, fmtP: fmtP };
+
+  /* ============================================================= content == */
+
+  var OBS_PER_GROUP = 8;
+
+  /* Fixed standardized offsets, one set per group, generated once from a
+     seeded stream. Moving a group mean shifts its points; changing the spread
+     scales them around their own centre. The pattern therefore stays
+     recognizable while the student experiments. */
+  function zTemplate(seed, k) {
+    var r = H ? H.rng(seed) : null, out = [], i, j, col, m, sd, s2;
+    for (i = 0; i < k; i++) {
+      col = [];
+      for (j = 0; j < OBS_PER_GROUP; j++) {
+        // Box-Muller without depending on the shell's draw helper
+        var u = 1 - r(), v = r();
+        col.push(Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v));
+      }
+      // centre and scale so each column has mean 0 and SD exactly 1
+      m = mean(col);
+      s2 = 0;
+      for (j = 0; j < col.length; j++) s2 += (col[j] - m) * (col[j] - m);
+      sd = Math.sqrt(s2 / (col.length - 1));
+      out.push(col.map(function (z) { return (z - m) / sd; }));
+    }
+    return out;
+  }
+
+  var SCENARIOS = [
+    {
+      id: "satisfaction",
+      label: "Hotel company — guest satisfaction at three properties",
+      groups: ["Property A", "Property B", "Property C"],
+      unit: { suffix: " / 10" }, decimals: 2,
+      base: [8.20, 8.00, 7.65], spread0: 0.75,
+      meanRange: [7.2, 8.8], meanStep: 0.05,
+      spreadRange: [0.25, 1.10], spreadStep: 0.05,
+      seed: 6101,
+      quantity: "average guest satisfaction score",
+      story: "A hotel company collects departure-survey scores at three properties, eight guests " +
+             "sampled at each. Corporate wants to know whether average satisfaction differs across " +
+             "the three properties.",
+      practical: "A gap of a tenth of a point on a 10-point survey can be statistically detectable " +
+                 "and still be too small to justify a property-level intervention.",
+      preset: { means: [8.20, 7.85, 7.40], spread: 0.55 }
+    },
+    {
+      id: "wait",
+      label: "Restaurant group — Friday wait at three locations",
+      groups: ["Downtown", "Airport", "Suburban"],
+      unit: { suffix: " min" }, decimals: 2,
+      base: [16.0, 18.2, 20.6], spread0: 3.4,
+      meanRange: [13.0, 23.0], meanStep: 0.2,
+      spreadRange: [1.2, 5.5], spreadStep: 0.1,
+      seed: 6102,
+      quantity: "average Friday wait",
+      story: "A restaurant group times eight randomly chosen Friday-evening parties at each of three " +
+             "locations. Operations wants to know whether the average wait differs across locations.",
+      practical: "Two minutes of average wait may be statistically detectable and still be inside the " +
+                 "range the host stand already quotes.",
+      preset: { means: [16.0, 18.4, 21.0], spread: 2.4 }
+    },
+    {
+      id: "spend",
+      label: "Resort — on-property spending under three package types",
+      groups: ["Room only", "Half board", "All inclusive"],
+      unit: { prefix: "$" }, decimals: 2,
+      base: [380, 405, 445], spread0: 70,
+      meanRange: [330, 520], meanStep: 5,
+      spreadRange: [25, 95], spreadStep: 5,
+      seed: 6103,
+      quantity: "average on-property spending per stay",
+      story: "A resort pulls eight folios under each of three package types and records on-property " +
+             "spending per stay. Finance wants to know whether average spending differs by package.",
+      practical: "A $25 difference in average spend can be statistically detectable and still be " +
+                 "smaller than the cost of changing the package structure.",
+      preset: { means: [380, 425, 480], spread: 45 }
+    }
+  ];
+
+  core.scenarios = SCENARIOS;
+  core.obsPerGroup = OBS_PER_GROUP;
+  core.zTemplate = zTemplate;
+
+  /* The plotting scale for a scenario: wide enough that no reachable
+     combination of group centres and spread can push an observation off the
+     axis, then held fixed while the student experiments. */
+  function axisFor(sc, z) {
+    var maxAbsZ = 0, i, j;
+    for (i = 0; i < z.length; i++) {
+      for (j = 0; j < z[i].length; j++) maxAbsZ = Math.max(maxAbsZ, Math.abs(z[i][j]));
+    }
+    var reach = maxAbsZ * sc.spreadRange[1];
+    var lo = sc.meanRange[0] - reach, hi = sc.meanRange[1] + reach;
+    var pad = (hi - lo) * 0.03;
+    return [lo - pad, hi + pad];
+  }
+
+  /* Build the three groups of observations from centres and a spread. */
+  function buildGroups(z, means, spread) {
+    return means.map(function (m, i) {
+      return z[i].map(function (zv) { return m + spread * zv; });
+    });
+  }
+  core.buildGroups = buildGroups;
+  core.axisFor = axisFor;
+
+  global.HTM514_ANOVA = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag), k;
+    for (k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* ========================================================== quick check == */
+
+  function quickCheck(sc) {
+    var g = sc.groups;
+    return [
+      {
+        stem: "What is the null hypothesis in a one-way ANOVA across " + g[0] + ", " + g[1] +
+              ", and " + g[2] + "?",
+        options: [
+          { text: "All three population means are equal.", correct: true,
+            why: "\u03BC\u2081 = \u03BC\u2082 = \u03BC\u2083. The course puts it simply: null means " +
+                 "\u201Csame\u201D, alternative means \u201Cdifferent\u201D." },
+          { text: "All three population means are different.", correct: false,
+            why: "That is not the alternative either. The alternative is that <em>at least one</em> mean " +
+                 "differs \u2014 which is a much weaker claim than all three differing." },
+          { text: "The three sample means are equal.", correct: false,
+            why: "Hypotheses are about populations. The sample means are almost never exactly equal even " +
+                 "when the populations are." }
+        ]
+      },
+      {
+        stem: "A large F generally indicates what?",
+        options: [
+          { text: "Variation among the group means is large compared with variation within the groups.",
+            correct: true,
+            why: "That ratio is the whole statistic. F is large when the centres are far apart <em>and</em> " +
+                 "the points inside each group are tightly packed." },
+          { text: "The group means are far apart in absolute terms.", correct: false,
+            why: "Distance alone does not do it. The same gap between centres gives a small F if the " +
+                 "groups are noisy \u2014 move the spread slider and watch." },
+          { text: "The sample sizes are large.", correct: false,
+            why: "A large sample size by itself does not guarantee a large F. In this interactive the " +
+                 "sample size is held fixed; F is large when MS Between is large relative to MS Within." }
+        ]
+      },
+      {
+        stem: "You move the group means farther apart while the within-group spread stays fixed. " +
+              "What happens to F?",
+        options: [
+          { text: "It rises \u2014 the between-group mean square grows while the within-group mean " +
+                  "square stays put.", correct: true,
+            why: "The numerator grows, the denominator does not. This is the first of the two levers." },
+          { text: "It falls, because the groups overlap less.", correct: false,
+            why: "Less overlap is stronger evidence, which means a larger F and a smaller p-value." },
+          { text: "It stays the same, because the spread did not change.", correct: false,
+            why: "F is a ratio of two mean squares, and the numerator is exactly what you changed. " +
+                 "Moving the centres apart raises MS Between, so F moves even though the spread did not." }
+        ]
+      },
+      {
+        stem: "Within-group variation increases while the group means stay exactly where they are. " +
+              "What happens?",
+        options: [
+          { text: "F falls and the p-value rises \u2014 the same gaps are now small relative to the noise.",
+            correct: true,
+            why: "The deck's contrast exactly: slightly different means against fairly large variances " +
+                 "looks unconvincing, even though the centres never moved." },
+          { text: "Nothing changes, because the group means are unchanged.", correct: false,
+            why: "The denominator is the within-group mean square. Raising it shrinks F directly." },
+          { text: "F rises, because there is more total variation.", correct: false,
+            why: "More total variation of the wrong kind. Only between-group variation pushes F up." }
+        ]
+      },
+      {
+        stem: "The ANOVA gives p = .01. Does that mean all three properties differ from each other?",
+        options: [
+          { text: "No \u2014 it means the population means are not all equal. At least one differs.",
+            correct: true,
+            why: "The alternative is \u201Cnot all equal\u201D. Two of the three could be effectively " +
+                 "identical while the third sits apart." },
+          { text: "Yes \u2014 a significant ANOVA means every pair differs.", correct: false,
+            why: "A common misreading. The cereal-shelf example in lecture rejects the equal-means null, " +
+                 "and then only one pair of shelf heights turns out to differ." },
+          { text: "Yes, provided the sample sizes are equal.", correct: false,
+            why: "Equal group sizes make the design balanced; they say nothing about which pairs differ." }
+        ]
+      },
+      {
+        stem: "After rejecting H\u2080, how do you find out which groups differ?",
+        options: [
+          { text: "Run a separate multiple-comparison procedure such as Tukey.", correct: true,
+            why: "That is the second step in the lecture's own workflow \u2014 the ANOVA answers the " +
+                 "overall question, then the comparison intervals say where the difference sits." },
+          { text: "Compare the sample means and pick the largest gap.", correct: false,
+            why: "The largest observed gap is a sample result. Deciding it is real requires a procedure " +
+                 "that accounts for making several comparisons at once." },
+          { text: "The ANOVA table already reports it.", correct: false,
+            why: "The table reports one F and one p-value for the whole comparison, nothing pairwise." }
+        ]
+      },
+      {
+        stem: "p < .05 across the three " + (sc.id === "spend" ? "package types" : "locations") +
+              ". Does that make the differences important to management?",
+        options: [
+          { text: "No \u2014 significance addresses evidence relative to variation, not the size or " +
+                  "value of the differences.", correct: true,
+            why: sc.practical },
+          { text: "Yes \u2014 a significant difference is by definition a meaningful one.", correct: false,
+            why: "Significant is a statement about evidence. Whether a gap of that size is worth acting " +
+                 "on is a management judgement the test cannot make." },
+          { text: "Yes, if F is above 10.", correct: false,
+            why: "A larger F means stronger evidence, still with nothing said about whether the gap " +
+                 "matters operationally." }
+        ]
+      },
+      {
+        stem: "What does MS Within represent?",
+        options: [
+          { text: "The average variation of observations around their own group mean \u2014 the noise " +
+                  "inside the groups.", correct: true,
+            why: "It is the denominator of F, and it is what the spread slider moves. The course calls " +
+                 "this side \u201CWITHIN\u201D." },
+          { text: "The variation among the three group means.", correct: false,
+            why: "That is MS Between, the numerator." },
+          { text: "The total variation in the whole data set.", correct: false,
+            why: "Total variation splits into the between and within parts. MS Within is only one of them." }
+        ]
+      },
+      {
+        stem: "Two data sets have nearly identical group means but very different p-values. How?",
+        options: [
+          { text: "Their within-group variability differs, and F compares the between-group differences " +
+                  "against exactly that.", correct: true,
+            why: "The same gaps read as convincing against tight groups and as noise against scattered " +
+                 "ones. This is the comparison in the panel above." },
+          { text: "One of the two must have been calculated incorrectly.", correct: false,
+            why: "Both can be perfectly correct. The group means alone never determine the p-value." },
+          { text: "The grand mean must be different.", correct: false,
+            why: "The grand mean follows from the group means; it is not what separates the two results." }
+        ]
+      }
+    ];
+  }
+
+  /* =============================================================== page === */
+
+  var pageModule = {
+    title: "Between the groups, or inside them?",
+    subtitle: "One-way ANOVA: how far apart the group centres sit, measured against the noise within each group.",
+    courseFit: "Optional practice for Week 13 (ANOVA, Ch. 18 \u2014 between versus within variation, " +
+               "the F ratio). About 8 minutes. Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { sc: SCENARIOS[0], z: null, axis: null, means: [], spread: 0,
+                    challenge: 0, done: [false, false] };
+
+      /* --- step 1: the question ------------------------------------------ */
+      var s1 = steps.add({ id: "question", title: "The question" });
+      var story = h("p", { class: "scenario-text" });
+      var hyp = h("div", { class: "panel" });
+      var plotBox = h("div", { class: "chart-box" });
+      var plotSvg = svgEl("svg", { viewBox: "0 0 640 250", role: "img", style: "width:100%;height:auto" });
+      plotBox.appendChild(plotSvg);
+      var plotCap = h("p", { class: "cap" });
+      plotBox.appendChild(plotCap);
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a scenario",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(plotBox);
+      s1.body.appendChild(hyp);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Scenario" }), picker])
+      ]));
+
+      /* --- step 2: predict ------------------------------------------------ */
+      var s2 = steps.add({
+        id: "predict", title: "Predict",
+        hint: "Look at the picture, not at a formula: how far apart are the centres compared with the scatter?"
+      });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* --- step 3: between and within ------------------------------------- */
+      var s3 = steps.add({
+        id: "move", title: "Between and within", locked: true,
+        hint: "Group A stays put. Move the other two centres, then change how tightly the points sit around them."
+      });
+      var bRange = h("input", {
+        type: "range", id: "b-range", "aria-label": "Mean of the second group",
+        oninput: function () { state.means[1] = Number(this.value); renderAll(); }
+      });
+      var cRange = h("input", {
+        type: "range", id: "c-range", "aria-label": "Mean of the third group",
+        oninput: function () { state.means[2] = Number(this.value); renderAll(); }
+      });
+      var spreadRange = h("input", {
+        type: "range", id: "spread-range", "aria-label": "Within-group spread",
+        oninput: function () { state.spread = Number(this.value); renderAll(); }
+      });
+      var bLab = h("label", { for: "b-range", id: "b-lab" });
+      var cLab = h("label", { for: "c-range", id: "c-lab" });
+      var spreadLab = h("label", { for: "spread-range", id: "spread-lab" });
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [bLab, bRange]),
+        h("div", { class: "control" }, [cLab, cRange])
+      ]));
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [spreadLab, spreadRange]),
+        h("button", { class: "quiet", type: "button", text: "Back to the observed data",
+          onclick: function () { restore(); } })
+      ]));
+      var table = h("table", { class: "readout" });
+      s3.body.appendChild(table);
+      var verdict = h("div", { class: "feedback" });
+      s3.body.appendChild(verdict);
+      var ratio = h("p", { class: "hint" });
+      s3.body.appendChild(ratio);
+
+      var chBtns = h("div", { class: "controls" });
+      [0, 1].forEach(function (i) {
+        chBtns.appendChild(h("button", {
+          type: "button", "data-challenge": String(i), text: "Challenge " + (i + 1),
+          onclick: function () { startChallenge(i); }
+        }));
+      });
+      s3.body.appendChild(chBtns);
+      var chBox = h("div", { class: "panel" });
+      s3.body.appendChild(chBox);
+
+      /* --- step 4: same means, different noise + interpretation ----------- */
+      var s4 = steps.add({ id: "read", title: "Same centres, different verdict", locked: true });
+      var twinBox = h("div", { class: "chart-box" });
+      var twinSvg = svgEl("svg", { viewBox: "0 0 640 250", role: "img", style: "width:100%;height:auto" });
+      twinBox.appendChild(h("h3", { text: "The same three group means, twice" }));
+      twinBox.appendChild(twinSvg);
+      var twinCap = h("p", { class: "cap" });
+      twinBox.appendChild(twinCap);
+      s4.body.appendChild(twinBox);
+      var twinQ = h("div");
+      s4.body.appendChild(twinQ);
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+      var assumption = h("p", { class: "hint" });
+      s4.body.appendChild(assumption);
+
+      /* --- step 5: quick check --------------------------------------------- */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another scenario",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-question").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* -------------------------------------------------------- formatting - */
+
+      function u(v, d) {
+        var sc = state.sc, dec = d === undefined ? sc.decimals : d;
+        if (!isFinite(v)) return "\u2014";
+        return (v < 0 ? "\u2212" : "") + (sc.unit.prefix || "") +
+               Math.abs(v).toFixed(dec) + (sc.unit.suffix || "");
+      }
+
+      function current() { return anova(buildGroups(state.z, state.means, state.spread)); }
+
+      /* ---------------------------------------------------------- scenario - */
+
+      function setScenario(id) {
+        var sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.sc = sc;
+        state.z = zTemplate(sc.seed, 3);
+        state.axis = axisFor(sc, state.z);
+        state.means = sc.base.slice();
+        state.spread = sc.spread0;
+        state.challenge = 0;
+        state.done = [false, false];
+        [bRange, cRange].forEach(function (el) {
+          el.min = sc.meanRange[0]; el.max = sc.meanRange[1]; el.step = sc.meanStep;
+        });
+        spreadRange.min = sc.spreadRange[0];
+        spreadRange.max = sc.spreadRange[1];
+        spreadRange.step = sc.spreadStep;
+        syncControls();
+        story.textContent = sc.story;
+        hyp.innerHTML = "<h3>The hypotheses</h3><p><strong>H\u2080: \u03BC\u2081 = \u03BC\u2082 = " +
+          "\u03BC\u2083</strong> \u2014 the population " + sc.quantity + " is the same at all three.<br>" +
+          "<strong>H\u2081: at least one differs.</strong> Not \u201Call three differ\u201D \u2014 that " +
+          "is a different and much stronger claim. Tested at \u03B1 = .05.</p>";
+        renderPrediction();
+        renderTwin();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(sc), 613).el);
+        assumption.textContent = "One-way ANOVA generally assumes independent observations, " +
+          "approximately normal distributions within groups, and equal population variances. This " +
+          "interactive focuses on the between-versus-within idea.";
+        renderAll();
+        ["move", "read", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      function syncControls() {
+        bRange.value = String(state.means[1]);
+        cRange.value = String(state.means[2]);
+        spreadRange.value = String(state.spread);
+      }
+
+      function restore() {
+        state.means = state.sc.base.slice();
+        state.spread = state.sc.spread0;
+        syncControls();
+        renderAll();
+      }
+
+      function startChallenge(i) {
+        state.challenge = i;
+        if (i === 0) {
+          state.means = state.sc.base.slice();
+          state.spread = state.sc.spread0;
+        } else {
+          state.means = state.sc.preset.means.slice();
+          state.spread = state.sc.preset.spread;
+        }
+        syncControls();
+        renderAll();
+      }
+
+      function renderPrediction() {
+        predictSlot.innerHTML = "";
+        var r = anova(buildGroups(state.z, state.sc.base, state.sc.spread0));
+        var reveal = "The one-way ANOVA on this configuration gives F(" + r.dfB + ", " + r.dfW + ") = " +
+          r.F.toFixed(2) + ", so " + fmtP(r.p) + " \u2014 " +
+          (r.reject ? "enough to reject the equal-means null at \u03B1 = .05."
+                    : "not enough to reject the equal-means null at \u03B1 = .05.") +
+          " Judging this by eye is hard precisely because the gaps have to be weighed against the " +
+          "scatter, which is what F does. The working is below.";
+        var q = {
+          stem: "Based on the pattern, do you expect strong evidence that the three population means " +
+                "are not all equal?",
+          shuffle: false,
+          options: [
+            { text: "Yes", correct: true, why: reveal },
+            { text: "No", correct: true, why: reveal },
+            { text: "Not sure", correct: true, why: reveal }
+          ]
+        };
+        predictSlot.appendChild(new H.Choices(q, function () {
+          ["move", "read", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("The ANOVA result is shown below.");
+        }).el);
+      }
+
+      /* ------------------------------------------------------------ render - */
+
+      function renderAll() {
+        var sc = state.sc, r = current();
+        bLab.textContent = sc.groups[1] + " mean (" + u(state.means[1]) + ")";
+        cLab.textContent = sc.groups[2] + " mean (" + u(state.means[2]) + ")";
+        spreadLab.textContent = "Within-group spread (" + u(state.spread) + ")";
+        Array.prototype.forEach.call(chBtns.children, function (b, i) {
+          var on = i === state.challenge;
+          b.className = on ? "primary" : "";
+          b.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        renderPlot(plotSvg, plotCap, buildGroups(state.z, state.means, state.spread), r, true);
+        renderTable(r);
+        renderVerdict(r);
+        renderRatio(r);
+        renderChallenge(r);
+        renderMeaning(r);
+      }
+
+      function renderTable(r) {
+        var sc = state.sc;
+        table.innerHTML = "<caption>The working</caption>" +
+          "<tr><th scope='col'>Source</th><th scope='col'>SS</th><th scope='col'>df</th>" +
+          "<th scope='col'>MS</th><th scope='col'>F</th></tr>" +
+          "<tr><th scope='row'>Between groups</th><td class='num'>" + r.ssB.toFixed(2) + "</td>" +
+          "<td class='num'>" + r.dfB + "</td><td class='num'>" + r.msB.toFixed(2) + "</td>" +
+          "<td class='num'>" + (r.degenerate ? "\u2014" : r.F.toFixed(2)) + "</td></tr>" +
+          "<tr><th scope='row'>Within groups</th><td class='num'>" + r.ssW.toFixed(2) + "</td>" +
+          "<td class='num'>" + r.dfW + "</td><td class='num'>" + r.msW.toFixed(2) + "</td>" +
+          "<td class='num'></td></tr>" +
+          "<tr><th scope='row'>Group means</th><td colspan='4'>" +
+          sc.groups.map(function (g, i) { return g + " " + u(r.means[i]); }).join(" \u00B7 ") +
+          " \u00B7 grand mean " + u(r.grand) + "</td></tr>";
+      }
+
+      function renderVerdict(r) {
+        if (r.degenerate) {
+          verdict.setAttribute("data-verdict", "");
+          verdict.innerHTML = "<span class='verdict'>No test is possible here.</span> Every observation " +
+            "sits exactly on its own group mean, so there is no within-group variation to compare the " +
+            "group differences against.";
+          return;
+        }
+        verdict.setAttribute("data-verdict", r.reject ? "ok" : "");
+        verdict.innerHTML = "<span class='verdict'>F(" + r.dfB + ", " + r.dfW + ") = " + r.F.toFixed(2) +
+          ", " + fmtP(r.p) + "</span> \u2014 " +
+          (r.reject
+            ? "<strong>Reject H\u2080 at \u03B1 = .05.</strong> The data provide evidence that the " +
+              "population means are not all equal \u2014 not that all three differ, and not which ones do."
+            : "<strong>Do not reject H\u2080 at \u03B1 = .05.</strong> This sample does not provide " +
+              "sufficiently strong evidence that the population means differ, which is not the same as " +
+              "showing the groups are identical.");
+        H.announce("F is " + r.F.toFixed(2) + ", " + fmtP(r.p) + ".");
+      }
+
+      function renderRatio(r) {
+        if (r.degenerate) { ratio.innerHTML = ""; return; }
+        ratio.innerHTML = "Conceptually, F compares variation <em>among</em> the group means with " +
+          "variation <em>within</em> the groups. Formally it is the ratio of the two mean squares: " +
+          "F = MS Between / MS Within = " + r.msB.toFixed(2) + " / " + r.msW.toFixed(2) + " = " +
+          r.F.toFixed(2) + ".";
+      }
+
+      var CHALLENGES = [
+        {
+          ask: "Move the two group centres until the evidence is clearly stronger \u2014 get F to at " +
+               "least double its starting value \u2014 without touching the spread.",
+          /* Doubling F rather than "reach p < .05", because one scenario starts
+             significant already and would otherwise complete itself. */
+          met: function (r, startSpread, meansUnchanged, startF) {
+            return !r.degenerate && !meansUnchanged && state.spread === startSpread &&
+                   r.F >= 2 * startF;
+          },
+          win: "The centres moved apart, MS Between grew, MS Within did not, and F rose. Nothing about " +
+               "the noise inside the groups changed."
+        },
+        {
+          ask: "This starts from a configuration that is already significant. Now raise the " +
+               "within-group spread until the result is <em>no longer</em> significant \u2014 without " +
+               "moving any centre.",
+          met: function (r, startSpread, meansUnchanged) {
+            return !r.degenerate && !r.reject && meansUnchanged && state.spread !== startSpread;
+          },
+          win: "The group centres are exactly where they were. The same gaps stopped being convincing " +
+               "because they are now small compared with the scatter inside each group \u2014 the " +
+               "denominator of F grew."
+        }
+      ];
+
+      function renderChallenge(r) {
+        var sc = state.sc, i = state.challenge, c = CHALLENGES[i];
+        var startSpread = i === 0 ? sc.spread0 : sc.preset.spread;
+        var startMeans = i === 0 ? sc.base : sc.preset.means;
+        var meansUnchanged = state.means.every(function (m, j) { return Math.abs(m - startMeans[j]) < 1e-9; });
+        var startF = anova(buildGroups(state.z, startMeans, startSpread)).F;
+        if (c.met(r, startSpread, meansUnchanged, startF)) state.done[i] = true;
+        chBox.innerHTML = "<h3>Challenge " + (i + 1) + " of 2</h3><p>" + c.ask +
+          (i === 0 ? " Starting value: F = " + startF.toFixed(2) + ", so the target is " +
+                     (2 * startF).toFixed(2) + "." : "") + "</p>" +
+          (state.done[i]
+            ? "<p><strong>Done.</strong> " + c.win + "</p>"
+            : "<p class='hint'>Currently F = " + (r.degenerate ? "\u2014" : r.F.toFixed(2)) + ", " +
+              fmtP(r.p) + ". " + (i === 1 ? "Spread is at " + u(state.spread) + "." : "") + "</p>");
+      }
+
+      function renderMeaning(r) {
+        var sc = state.sc;
+        meaning.innerHTML = "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What ANOVA means</strong>F compares variation among the group means with " +
+          "variation within the groups. A small p-value says the data provide evidence that the " +
+          "population means are not all equal.</div>" +
+          "<div><strong>What it does not mean</strong>Not that every pair differs, and not which pair " +
+          "does \u2014 ANOVA answers the overall question only. A separate multiple-comparison " +
+          "procedure such as Tukey is needed to say where the difference sits. A large p-value is not " +
+          "proof that the groups are identical.</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>" +
+          (r.degenerate ? "Nothing from this test \u2014 there is no within-group variation to test against."
+            : (r.reject
+              ? "\u201CThere is evidence that " + sc.quantity + " is not the same across the three. " +
+                "Which ones differ, and whether the gap is worth acting on, are separate questions.\u201D"
+              : "\u201CThis sample does not provide sufficiently strong evidence that " + sc.quantity +
+                " differs across the three at this significance level.\u201D")) +
+          " " + sc.practical + "</div></div>";
+      }
+
+      /* --------------------------------------------------- the twin panel - */
+
+      function renderTwin() {
+        var sc = state.sc;
+        var tight = anova(buildGroups(state.z, sc.preset.means, sc.spreadRange[0] * 1.5));
+        var loose = anova(buildGroups(state.z, sc.preset.means, sc.spreadRange[1] * 0.9));
+        renderTwinPlot(tight, loose);
+        twinCap.textContent = "Identical group means in both rows " +
+          sc.groups.map(function (g, i) { return g + " " + u(sc.preset.means[i]); }).join(" \u00B7 ") +
+          ". Only the scatter inside the groups differs. Top: F = " + tight.F.toFixed(2) + ", " +
+          fmtP(tight.p) + ". Bottom: F = " + loose.F.toFixed(2) + ", " + fmtP(loose.p) + ".";
+        twinQ.innerHTML = "";
+        twinQ.appendChild(new H.Choices({
+          stem: "The group means are the same in both rows. Why can the ANOVA verdict differ?",
+          options: [
+            { text: "Because F compares the between-group differences with the within-group variability, " +
+                    "and only the second one changed.", correct: true,
+              why: "The numerator is identical in the two rows. The denominator is not, and F is a ratio " +
+                   "\u2014 which is why the same gaps can be convincing in one data set and not in another." },
+            { text: "Because the grand mean is different in the two rows.", correct: false,
+              why: "The grand mean follows from the group means, and those are identical here." },
+            { text: "Because one of the two must be a calculation error.", correct: false,
+              why: "Both are correct. Group means alone never determine the p-value." }
+          ]
+        }).el);
+      }
+
+      /* -------------------------------------------------------------- plots - */
+
+      /* One lane per group on a scale fixed for the whole scenario, so moving
+         a centre or widening the spread reads as movement rather than as a
+         rescale. */
+      function renderPlot(svg, cap, groups, r, withCaption) {
+        var sc = state.sc;
+        var W = 640, L = 96, R = 24, T = 16, B = 34, Ht = 250;
+        var pw = W - L - R, ph = Ht - T - B;
+        var lo = state.axis[0], hi = state.axis[1];
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        var laneH = ph / 3;
+
+        // grand mean, drawn behind everything
+        if (!isNaN(r.grand)) {
+          line(svg, X(r.grand), T, X(r.grand), T + ph, "#8E7B4F", 1.5, "5,4");
+          txt(svg, X(r.grand), T + 10, "grand mean", "10", "#6B6B6B", "middle");
+        }
+
+        groups.forEach(function (g, i) {
+          var yMid = T + laneH * i + laneH / 2;
+          txt(svg, 6, yMid + 4, sc.groups[i], "12", "#131313", "start");
+          line(svg, L, yMid + laneH / 2 - 2, L + pw, yMid + laneH / 2 - 2, "#EDEDED", 1);
+          // observations, deterministic vertical offsets so the picture is stable
+          g.forEach(function (v, j) {
+            var off = ((j % 4) - 1.5) * 7;
+            var x = X(v);
+            if (x < L) x = L; if (x > L + pw) x = L + pw;
+            svg.appendChild(svgEl("circle", { cx: x, cy: yMid + off, r: 4,
+              fill: "#FFFFFF", stroke: "#131313", "stroke-width": 1.2 }));
+          });
+          // group mean marker: a filled diamond plus a tick, not colour alone
+          var mx = X(r.means[i]);
+          line(svg, mx, yMid - laneH / 2 + 6, mx, yMid + laneH / 2 - 6, "#131313", 2);
+          svg.appendChild(svgEl("polygon", {
+            points: mx + "," + (yMid - 9) + " " + (mx + 7) + "," + yMid + " " +
+                    mx + "," + (yMid + 9) + " " + (mx - 7) + "," + yMid,
+            fill: "#CFB991", stroke: "#131313", "stroke-width": 1.5
+          }));
+          txt(svg, mx, yMid - laneH / 2 + 4, u(r.means[i]), "10", "#131313", "middle");
+        });
+
+        // axis
+        var axisY = T + ph + 8;
+        line(svg, L, axisY, L + pw, axisY, "#131313", 1);
+        [0, 0.5, 1].forEach(function (f) {
+          var v = lo + f * (hi - lo);
+          line(svg, X(v), axisY, X(v), axisY + 4, "#131313", 1);
+          txt(svg, X(v), axisY + 17, u(v, 1), "11", "#6B6B6B", "middle");
+        });
+
+        if (withCaption) {
+          cap.textContent = "Eight observations per group, one lane each. The diamond is the group mean; " +
+            "the dashed line is the grand mean. The scale is fixed for this scenario.";
+        }
+        svg.setAttribute("aria-label", "Dot plot of three groups. " +
+          sc.groups.map(function (g, i) { return g + " mean " + u(r.means[i]); }).join(", ") +
+          ". Grand mean " + u(r.grand) + "." +
+          (r.degenerate ? "" : " F equals " + r.F.toFixed(2) + " and " + fmtP(r.p) + "."));
+      }
+
+      function renderTwinPlot(tight, loose) {
+        var sc = state.sc;
+        var W = 640, L = 96, R = 24, T = 14, B = 30, Ht = 250;
+        var pw = W - L - R, ph = Ht - T - B;
+        var lo = state.axis[0], hi = state.axis[1];
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        while (twinSvg.firstChild) twinSvg.removeChild(twinSvg.firstChild);
+        var rows = [
+          { r: tight, groups: buildGroups(state.z, sc.preset.means, sc.spreadRange[0] * 1.5), label: "Tight groups" },
+          { r: loose, groups: buildGroups(state.z, sc.preset.means, sc.spreadRange[1] * 0.9), label: "Scattered groups" }
+        ];
+        rows.forEach(function (row, ri) {
+          var top = T + ri * (ph / 2);
+          var laneH = (ph / 2) / 3;
+          txt(twinSvg, 6, top + 12, row.label, "12", "#131313", "start");
+          row.groups.forEach(function (g, i) {
+            var yMid = top + laneH * i + laneH / 2 + 6;
+            g.forEach(function (v, j) {
+              var x = X(v);
+              if (x < L) x = L; if (x > L + pw) x = L + pw;
+              twinSvg.appendChild(svgEl("circle", { cx: x, cy: yMid + ((j % 3) - 1) * 4, r: 3,
+                fill: "#FFFFFF", stroke: "#131313", "stroke-width": 1 }));
+            });
+            var mx = X(row.r.means[i]);
+            line(twinSvg, mx, yMid - 9, mx, yMid + 9, "#131313", 2);
+          });
+          txt(twinSvg, L + pw, top + 12, "F = " + row.r.F.toFixed(2) + ", " + fmtP(row.r.p),
+            "11", "#131313", "end");
+        });
+        var axisY = T + ph + 6;
+        line(twinSvg, L, axisY, L + pw, axisY, "#131313", 1);
+        [0, 0.5, 1].forEach(function (f) {
+          var v = lo + f * (hi - lo);
+          line(twinSvg, X(v), axisY, X(v), axisY + 4, "#131313", 1);
+          txt(twinSvg, X(v), axisY + 17, u(v, 1), "11", "#6B6B6B", "middle");
+        });
+        twinSvg.setAttribute("aria-label", "Two data sets with identical group means. The tight one gives " +
+          "F equals " + tight.F.toFixed(2) + " and " + fmtP(tight.p) + "; the scattered one gives F equals " +
+          loose.F.toFixed(2) + " and " + fmtP(loose.p) + ".");
+      }
+
+      function line(svg, x1, y1, x2, y2, stroke, w, dash) {
+        var a = { x1: x1, y1: y1, x2: x2, y2: y2, stroke: stroke, "stroke-width": w };
+        if (dash) a["stroke-dasharray"] = dash;
+        svg.appendChild(svgEl("line", a));
+      }
+      function txt(svg, x, y, s, size, fill, anchor) {
+        var n = svgEl("text", { x: x, y: y, "font-size": size, fill: fill, "text-anchor": anchor,
+          "font-family": "Segoe UI, Arial, sans-serif" });
+        n.textContent = s;
+        svg.appendChild(n);
+      }
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

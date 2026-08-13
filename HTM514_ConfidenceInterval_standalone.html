@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Confidence Interval Explorer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: how sample size and confidence level set the width of a confidence interval for a mean.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 4
+   "Confidence Interval Explorer"
+
+   Fits beside Week 12 (Hypothesis Testing and Confidence Interval
+   Estimation; Ch. 8 assignment problems). One idea only: an interval pairs
+   an estimate with its uncertainty, and a larger sample buys a narrower
+   interval — through the standard error, which Module 1 already established.
+
+   Method: one-sample t interval for a mean with sigma unknown, exactly as
+   the Week 12 deck sets it up ("substituting sigma with s leads to the t
+   distribution, which depends on the degrees of freedom, df = n - 1").
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ================================================================= math ==
+     t critical values with no external dependency.
+
+     P(|T| > t) for df degrees of freedom equals the regularized incomplete
+     beta function I_x(df/2, 1/2) with x = df / (df + t^2). The incomplete
+     beta is evaluated by the standard continued-fraction expansion (Lentz's
+     method) with a Lanczos log-gamma; the critical value is then recovered
+     by bisection on t. Accuracy against published t tables is within 0.0005
+     across df = 1 to 299 at the 90%, 95%, and 99% levels — see
+     tests/test-ci-math.js, which checks the values themselves rather than
+     the module's internal consistency.
+     ====================================================================== */
+
+  function lnGamma(z) {
+    var g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+             -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+             9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+    z -= 1;
+    var x = 0.99999999999980993, i;
+    for (i = 0; i < 8; i++) x += g[i] / (z + i + 1);
+    var t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  function betacf(a, b, x) {
+    var MAXIT = 200, EPS = 3e-14, FPMIN = 1e-300;
+    var qab = a + b, qap = a + 1, qam = a - 1;
+    var c = 1, d = 1 - qab * x / qap, h, m, m2, aa, del;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    d = 1 / d; h = d;
+    for (m = 1; m <= MAXIT; m++) {
+      m2 = 2 * m;
+      aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; h *= d * c;
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; del = d * c; h *= del;
+      if (Math.abs(del - 1) < EPS) break;
+    }
+    return h;
+  }
+
+  function betai(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    var bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) +
+                      a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2)
+      ? bt * betacf(a, b, x) / a
+      : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+
+  /* Two-tailed area beyond +/- t. */
+  function tTailTwo(t, df) {
+    if (!(df > 0)) return NaN;
+    if (t <= 0) return 1;
+    return betai(df / 2, 0.5, df / (df + t * t));
+  }
+
+  /* Two-sided critical value for a confidence level in (0,1). */
+  function tCrit(conf, df) {
+    if (!(df > 0) || !(conf > 0) || !(conf < 1)) return null;
+    var target = 1 - conf, lo = 0, hi = 100, mid, i;
+    for (i = 0; i < 200; i++) {
+      mid = (lo + hi) / 2;
+      if (tTailTwo(mid, df) > target) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  /* The whole interval, at full precision. Returns null for inputs that
+     cannot produce one, so nothing downstream ever formats a NaN. */
+  function interval(mean, s, n, conf) {
+    if (!(n >= 2) || !(s >= 0) || !isFinite(mean) || !(conf > 0) || !(conf < 1)) return null;
+    var df = n - 1;
+    var se = s / Math.sqrt(n);
+    var t = tCrit(conf, df);
+    if (t === null) return null;
+    var me = t * se;
+    return { mean: mean, s: s, n: n, df: df, conf: conf, se: se, t: t, me: me,
+             lower: mean - me, upper: mean + me, width: 2 * me };
+  }
+
+  var core = { lnGamma: lnGamma, betai: betai, tTailTwo: tTailTwo, tCrit: tCrit, interval: interval };
+
+  /* ============================================================= content == */
+
+  var LEVELS = [0.90, 0.95, 0.99];
+  var N_MIN = 10, N_MAX = 300;
+
+  var SCENARIOS = [
+    {
+      id: "satisfaction",
+      label: "Hotel — guest satisfaction score",
+      quantity: "average satisfaction score",
+      unit: { suffix: " / 10" }, decimals: 2,
+      mean: 8.1, s: 1.4, n0: 25,
+      story: "A hotel asks a random sample of departing guests to rate their stay from 0 to 10. " +
+             "The sample average is 8.1 with a sample standard deviation of 1.4. The manager wants " +
+             "the average for all guests, not just the ones who answered.",
+      manager: "\"Our best estimate of the average guest rating is 8.1, and this method puts the " +
+               "plausible range for the true average at roughly the interval shown.\""
+    },
+    {
+      id: "wait",
+      label: "Restaurant — Friday wait time",
+      quantity: "average wait time",
+      unit: { suffix: " min" }, decimals: 2,
+      mean: 18.6, s: 6.2, n0: 25,
+      story: "A restaurant times a random sample of Friday-evening parties from arrival to seating. " +
+             "The sample average is 18.6 minutes with a sample standard deviation of 6.2 minutes. " +
+             "The host stand wants to quote an honest typical wait.",
+      manager: "\"This sample supports the interval shown as an estimate of the population average " +
+               "Friday wait. Quoting the single number 18.6 as if it were exact would claim more " +
+               "precision than the sample provides.\""
+    },
+    {
+      id: "spend",
+      label: "Resort — spending per stay",
+      quantity: "average spending per stay",
+      unit: { prefix: "$" }, decimals: 2,
+      mean: 412, s: 138, n0: 25,
+      story: "A resort pulls a random sample of folios and records total on-property spending per " +
+             "stay. The sample average is $412 with a sample standard deviation of $138. Finance " +
+             "wants the average across all stays for next year's budget.",
+      manager: "\"Budget from the range, not from $412 alone. The interval is what this sample " +
+               "supports about the average stay.\""
+    }
+  ];
+
+  /* Twenty intervals from repeated samples of the same population, used once
+     as a static illustration of what the confidence level describes. The seed
+     is fixed so every student sees the same figure; it was chosen so the
+     figure shows a typical outcome with a miss or two rather than a
+     suspiciously perfect twenty out of twenty. The intervals themselves are
+     computed honestly from the simulated samples. */
+  var COVERAGE = { seed: 20240001, reps: 20, n: 20, mu: 8.1, sigma: 1.4, conf: 0.95 };
+
+  function coverageRuns(H2) {
+    var r = H2.rng(COVERAGE.seed), out = [], i, j, v, xs, m, sd, ci;
+    for (i = 0; i < COVERAGE.reps; i++) {
+      xs = [];
+      for (j = 0; j < COVERAGE.n; j++) xs.push(H2.draw.normal(r, COVERAGE.mu, COVERAGE.sigma));
+      m = H2.stats.mean(xs);
+      sd = H2.stats.sdSample(xs);
+      ci = interval(m, sd, COVERAGE.n, COVERAGE.conf);
+      out.push({ lower: ci.lower, upper: ci.upper, mean: m,
+                 covers: ci.lower <= COVERAGE.mu && ci.upper >= COVERAGE.mu });
+    }
+    return out;
+  }
+
+  core.scenarios = SCENARIOS;
+  core.levels = LEVELS;
+  core.nRange = [N_MIN, N_MAX];
+  core.coverageConfig = COVERAGE;
+  core.coverageRuns = coverageRuns;
+
+  global.HTM514_CI = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag), k;
+    for (k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* ========================================================== quick check == */
+
+  function quickCheck(sc) {
+    return [
+      {
+        stem: "You increase the sample size while the sample mean and sample standard deviation stay " +
+              "the same. What happens to the confidence interval?",
+        options: [
+          { text: "It gets narrower, because the standard error s/\u221An falls.", correct: true,
+            why: "The estimate stays put; the uncertainty around it shrinks. The critical value also " +
+                 "falls slightly as the degrees of freedom grow, but the standard error does most of the work." },
+          { text: "It gets wider, because more data means more variation.", correct: false,
+            why: "More observations do not make the population more variable. s estimates the same " +
+                 "population spread; only the precision of the mean improves." },
+          { text: "It stays the same, because the sample mean did not move.", correct: false,
+            why: "The centre does not move, but the half-width does: the margin of error is the critical " +
+                 "value times s/\u221An." }
+        ]
+      },
+      {
+        stem: "The sample size goes from 25 to 100 — four times larger. What happens to the standard error?",
+        options: [
+          { text: "It is cut roughly in half, because the standard error depends on \u221An.",
+            correct: true,
+            why: "\u221A4 = 2. This is the same relationship you met in the sampling module: four times " +
+                 "the sample size cuts the standard error approximately in half." },
+          { text: "It is cut to about a quarter, matching the increase in n.", correct: false,
+            why: "That would be true if the standard error were s/n. It is s/\u221An." },
+          { text: "It does not change, because s did not change.", correct: false,
+            why: "s is the spread of the observations; s/\u221An is the spread of the estimate. Only the " +
+                 "second one depends on n." }
+        ]
+      },
+      {
+        stem: "Holding the same sample and the same n, you raise the confidence level from 90% to 99%. " +
+              "What happens to the interval?",
+        options: [
+          { text: "It gets wider — a larger critical value is needed to succeed more often.", correct: true,
+            why: "Demanding that the procedure capture the parameter more often means casting a wider " +
+                 "net. Precision and confidence trade against each other at a fixed sample size." },
+          { text: "It gets narrower, because higher confidence means more certainty.", correct: false,
+            why: "Confidence here is about how often the procedure succeeds, not about how sharp the " +
+                 "answer is. Buying more of the first costs some of the second." },
+          { text: "It stays the same width; only the label changes.", correct: false,
+            why: "The critical value changes with the level: at df = 24 it runs about 1.71, 2.06, and " +
+                 "2.80 for 90%, 95%, and 99%." }
+        ]
+      },
+      {
+        stem: "Does a 95% confidence interval for the mean " + sc.quantity.replace("average ", "") +
+              " contain 95% of individual " + (sc.id === "satisfaction" ? "guest ratings" :
+              (sc.id === "wait" ? "parties' waits" : "stays")) + "?",
+        options: [
+          { text: "No — it is a range of plausible values for the population mean, not a range for individual cases.",
+            correct: true,
+            why: "The interval is built from s/\u221An, not from s. Individual cases are spread out by " +
+                 "roughly s, which is \u221An times wider. Mixing the two makes the business look far " +
+                 "more predictable than it is." },
+          { text: "Yes — that is what the 95% refers to.", correct: false,
+            why: "That would be a different quantity entirely. Notice the interval keeps shrinking as n " +
+                 "grows, while the spread of individual cases does not change at all." }
+        ]
+      },
+      {
+        stem: "An interval has been calculated: 7.75 to 8.45. Is it correct to say there is a 95% " +
+              "probability that the population mean lies between 7.75 and 8.45?",
+        options: [
+          { text: "No — the 95% describes how often the method succeeds in repeated sampling, not this one interval.",
+            correct: true,
+            why: "The population mean is a fixed number and this interval is now fixed too: it either " +
+                 "contains that number or it does not. What is 95% is the long-run success rate of the " +
+                 "procedure that produced it." },
+          { text: "Yes — that is the standard interpretation.", correct: false,
+            why: "It is the common phrasing and the one to avoid in a report. Both the parameter and the " +
+                 "computed endpoints are fixed once the sample is in hand; the randomness was in which " +
+                 "sample you drew." }
+        ]
+      },
+      {
+        stem: "Two analysts each take a random sample from the same population and report slightly " +
+              "different intervals. Does that mean one of them made a mistake?",
+        options: [
+          { text: "No — different samples give different estimates, so different intervals are expected.",
+            correct: true,
+            why: "This is sampling variability doing exactly what it does. Both intervals come from the " +
+                 "same procedure; most such intervals capture the parameter, and a few do not." },
+          { text: "Yes — a correct method would give the same interval every time.", correct: false,
+            why: "Only if both drew the same sample. A method that produced identical intervals from " +
+                 "different samples would be ignoring the data." }
+        ]
+      }
+    ];
+  }
+
+  /* =============================================================== page === */
+
+  var pageModule = {
+    title: "How much precision does the sample buy?",
+    subtitle: "A confidence interval pairs an estimate with its uncertainty — and the sample size sets the width.",
+    courseFit: "Optional practice for Week 12 (Hypothesis Testing and Confidence Interval Estimation; " +
+               "Ch. 8 problems). About 7 minutes. Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { sc: SCENARIOS[0], n: SCENARIOS[0].n0, conf: 0.95, axis: null };
+
+      /* --- step 1: the estimate ------------------------------------------ */
+      var s1 = steps.add({ id: "estimate", title: "The estimate" });
+      var story = h("p", { class: "scenario-text" });
+      var facts = h("table", { class: "readout" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a scenario",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(facts);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Scenario" }), picker])
+      ]));
+
+      /* --- step 2: predict ------------------------------------------------ */
+      var s2 = steps.add({
+        id: "predict", title: "Predict",
+        hint: "The sample mean and the sample standard deviation stay exactly where they are."
+      });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* --- step 3: change the sample size --------------------------------- */
+      var s3 = steps.add({
+        id: "size", title: "Change the sample size", locked: true,
+        hint: "Only n moves. Watch the standard error, then the margin of error, then the interval."
+      });
+      var nRange = h("input", {
+        type: "range", id: "n-range", min: String(N_MIN), max: String(N_MAX), step: "1",
+        value: String(state.n), "aria-label": "Sample size n",
+        oninput: function () { state.n = Number(this.value); renderAll(); }
+      });
+      var nLabel = h("span", { class: "checkline", id: "n-label" });
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "n-range", text: "Sample size (n)" }), nRange, nLabel]),
+        h("button", { class: "quiet", type: "button", text: "Back to n = 25",
+          onclick: function () { state.n = state.sc.n0; nRange.value = String(state.n); renderAll(); } })
+      ]));
+      var mainPlot = h("div", { class: "chart-box" });
+      var mainSvg = svgEl("svg", { viewBox: "0 0 640 120", role: "img", style: "width:100%;height:auto" });
+      mainPlot.appendChild(mainSvg);
+      s3.body.appendChild(mainPlot);
+      var numbers = h("table", { class: "readout" });
+      s3.body.appendChild(numbers);
+      var chain = h("div", { class: "feedback" });
+      s3.body.appendChild(chain);
+      var caution = h("p", { class: "hint", hidden: "hidden" });
+      s3.body.appendChild(caution);
+
+      var compareBox = h("div", { class: "panel" });
+      var compareSvg = svgEl("svg", { viewBox: "0 0 640 150", role: "img", style: "width:100%;height:auto" });
+      compareBox.appendChild(h("h3", { text: "Guided comparison: n = 25 against n = 100" }));
+      compareBox.appendChild(compareSvg);
+      var compareText = h("p", { class: "hint" });
+      compareBox.appendChild(compareText);
+      s3.body.appendChild(compareBox);
+
+      /* --- step 4: confidence level and what it means --------------------- */
+      var s4 = steps.add({ id: "level", title: "What the confidence level means", locked: true });
+      var levelPredictSlot = h("div");
+      s4.body.appendChild(levelPredictSlot);
+      var levelBtns = h("div", { class: "controls" });
+      LEVELS.forEach(function (L) {
+        levelBtns.appendChild(h("button", {
+          type: "button", "data-level": String(L), text: Math.round(L * 100) + "%",
+          onclick: function () { state.conf = L; renderAll(); }
+        }));
+      });
+      var levelWrap = h("div", { hidden: "hidden" }, [
+        h("p", { class: "hint", text: "Same sample, same n. Only the level changes." }),
+        levelBtns
+      ]);
+      var levelLine = h("p", {});
+      levelWrap.appendChild(levelLine);
+      s4.body.appendChild(levelWrap);
+
+      var covBox = h("div", { class: "chart-box" });
+      var covSvg = svgEl("svg", { viewBox: "0 0 640 250", role: "img", style: "width:100%;height:auto" });
+      covBox.appendChild(h("h3", { text: "Separate illustration: what 95% confidence means" }));
+      var covCap = h("p", { class: "cap" });
+      covBox.appendChild(covCap);
+      covBox.appendChild(covSvg);
+      s4.body.appendChild(covBox);
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+
+      /* --- step 5: quick check -------------------------------------------- */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another scenario",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-estimate").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* ------------------------------------------------------- formatting - */
+
+      function u(v, d) {
+        var sc = state.sc, dec = d === undefined ? sc.decimals : d;
+        if (!isFinite(v)) return "\u2014";
+        var body = Math.abs(v).toFixed(dec);
+        return (v < 0 ? "\u2212" : "") + (sc.unit.prefix || "") + body + (sc.unit.suffix || "");
+      }
+      function plain(v, d) { return v.toFixed(d === undefined ? state.sc.decimals : d); }
+
+      /* --------------------------------------------------------- scenario - */
+
+      function setScenario(id) {
+        state.sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.n = state.sc.n0;
+        state.conf = 0.95;
+        nRange.value = String(state.n);
+        // Fixed axis: wide enough for the widest interval this scenario can
+        // produce (n = 10 at 99%), so the scale never moves while n changes.
+        var widest = interval(state.sc.mean, state.sc.s, N_MIN, 0.99);
+        var pad = widest.me * 0.18;
+        state.axis = [state.sc.mean - widest.me - pad, state.sc.mean + widest.me + pad];
+        story.textContent = state.sc.story;
+        renderFacts();
+        renderPrediction();
+        renderLevelPredict();
+        levelWrap.hidden = true;
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(state.sc), 812).el);
+        renderAll();
+        ["size", "level", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      function renderFacts() {
+        var sc = state.sc;
+        facts.innerHTML =
+          "<caption>What the sample gives us</caption>" +
+          "<tr><th scope='row'>Sample mean (x\u0304)</th><td class='num'>" + u(sc.mean) + "</td></tr>" +
+          "<tr><th scope='row'>Sample standard deviation (s)</th><td class='num'>" + u(sc.s) + "</td></tr>" +
+          "<tr><th scope='row'>Sample size (n)</th><td class='num'>" + sc.n0 + "</td></tr>" +
+          "<tr><th scope='row'>Confidence level</th><td class='num'>95%</td></tr>";
+      }
+
+      function renderPrediction() {
+        predictSlot.innerHTML = "";
+        var q = {
+          stem: "If we increase the sample size while the sample mean and the sample standard deviation " +
+                "stay the same, what should happen to the confidence interval?",
+          shuffle: false,
+          options: [
+            { text: "It becomes wider.", correct: false,
+              why: "The interval is x\u0304 \u00B1 t\u00D7s/\u221An. Raising n lowers s/\u221An, so the " +
+                   "half-width falls. Move the slider and watch." },
+            { text: "It becomes narrower.", correct: true,
+              why: "The centre stays put and the half-width shrinks, because the margin of error is the " +
+                   "critical value times s/\u221An. Move the slider and watch how quickly it slows down." },
+            { text: "Its width stays the same.", correct: false,
+              why: "The centre stays the same; the width does not. Only s/\u221An carries n, and it falls " +
+                   "as n rises." },
+            { text: "Cannot be determined.", correct: false,
+              why: "It can, because the mean and s are being held fixed. The only moving part is s/\u221An " +
+                   "and the critical value, and both fall as n grows." }
+          ]
+        };
+        predictSlot.appendChild(new H.Choices(q, function () {
+          ["size", "level", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("The interval is now shown below.");
+        }).el);
+      }
+
+      function renderLevelPredict() {
+        levelPredictSlot.innerHTML = "";
+        var q = {
+          stem: "Same sample, same n. If we demand a <em>higher</em> confidence level, what happens to " +
+                "the interval?",
+          shuffle: false,
+          options: [
+            { text: "It becomes wider.", correct: true,
+              why: "A procedure that succeeds more often has to cast a wider net. Try the three levels below." },
+            { text: "It becomes narrower.", correct: false,
+              why: "Higher confidence is not sharper information — it is a more cautious net. Try the three " +
+                   "levels below and watch the critical value grow." },
+            { text: "It stays the same.", correct: false,
+              why: "The critical value depends on the level. Try the three levels below." }
+          ]
+        };
+        levelPredictSlot.appendChild(new H.Choices(q, function () {
+          levelWrap.hidden = false;
+          renderAll();
+        }).el);
+      }
+
+      /* ----------------------------------------------------------- render - */
+
+      function renderAll() {
+        var sc = state.sc, ci = interval(sc.mean, sc.s, state.n, state.conf);
+        nLabel.textContent = "n = " + state.n;
+        Array.prototype.forEach.call(levelBtns.children, function (b) {
+          var on = Number(b.getAttribute("data-level")) === state.conf;
+          b.className = on ? "primary" : "";
+          b.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+
+        renderIntervalPlot(mainSvg, [{ ci: ci, label: "n = " + state.n }], 120);
+        renderNumbers(ci);
+        renderChain(ci);
+        renderCaution();
+        renderCompare();
+        renderLevelLine();
+        renderCoverage();
+        renderMeaning(ci);
+      }
+
+      function renderNumbers(ci) {
+        numbers.innerHTML =
+          "<caption>At n = " + state.n + ", " + Math.round(state.conf * 100) + "% confidence</caption>" +
+          row("Point estimate (x\u0304)", u(ci.mean)) +
+          row("Standard error (s/\u221An)", u(ci.se, 3)) +
+          row("Critical value (t with df = " + ci.df + ")", plain(ci.t, 3)) +
+          row("Margin of error (t \u00D7 s/\u221An)", u(ci.me, 3)) +
+          row("Lower limit", u(ci.lower)) +
+          row("Upper limit", u(ci.upper)) +
+          row("Interval width", u(ci.width, 3));
+      }
+      function row(k, v) { return "<tr><th scope='row'>" + k + "</th><td class='num'>" + v + "</td></tr>"; }
+
+      function renderChain(ci) {
+        var base = interval(state.sc.mean, state.sc.s, state.sc.n0, state.conf);
+        chain.setAttribute("data-verdict", "ok");
+        chain.innerHTML = "<span class='verdict'>n = " + state.n + "</span> \u2192 standard error " +
+          u(ci.se, 3) + " \u2192 margin of error " + u(ci.me, 3) + " \u2192 interval " +
+          u(ci.lower) + " to " + u(ci.upper) + ", a width of " + u(ci.width, 3) + ". " +
+          (state.n === state.sc.n0 ? "This is the starting sample."
+            : "At the starting n = " + state.sc.n0 + " the width was " + u(base.width, 3) + ".");
+        H.announce("n " + state.n + ". Interval " + u(ci.lower) + " to " + u(ci.upper) + ".");
+      }
+
+      /* Week 12 sets the rule this follows: a fairly symmetric distribution is
+         fine at n as small as 5 or 10, but a skewed one needs n of at least 30.
+         Shown only below 30, and kept to one sentence — this is a caution, not
+         an assumptions lesson. */
+      function renderCaution() {
+        var show = state.n < 30;
+        caution.hidden = !show;
+        caution.innerHTML = show
+          ? "<strong>At this sample size:</strong> the t interval works best when the population is " +
+            "reasonably symmetric and has no severe outliers. Strongly skewed service measures may " +
+            "require a larger sample."
+          : "";
+      }
+
+      function renderCompare() {
+        var sc = state.sc;
+        var a = interval(sc.mean, sc.s, 25, state.conf);
+        var b = interval(sc.mean, sc.s, 100, state.conf);
+        renderIntervalPlot(compareSvg, [{ ci: a, label: "n = 25" }, { ci: b, label: "n = 100" }], 150);
+        compareText.innerHTML = "The sample became four times larger. The standard error went from " +
+          u(a.se, 3) + " to " + u(b.se, 3) + " \u2014 a factor of " + (a.se / b.se).toFixed(2) +
+          ", which is \u221A4. That is the same 1/\u221An relationship you saw in the sampling module, " +
+          "now doing visible work: the interval width fell from " + u(a.width, 3) + " to " +
+          u(b.width, 3) + ".";
+      }
+
+      function renderLevelLine() {
+        var sc = state.sc;
+        var parts = LEVELS.map(function (L) {
+          var ci = interval(sc.mean, sc.s, state.n, L);
+          return Math.round(L * 100) + "%: t = " + plain(ci.t, 3) + ", width " + u(ci.width, 3);
+        });
+        levelLine.innerHTML = "At n = " + state.n + " \u2014 " + parts.join(" \u00B7 ") +
+          ". Higher confidence, larger critical value, wider interval. Precision and confidence trade " +
+          "against each other at a fixed sample size.";
+      }
+
+      function renderMeaning(ci) {
+        var sc = state.sc;
+        meaning.innerHTML =
+          "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What it means</strong>A range of plausible values for the population " +
+          sc.quantity + ", under the assumptions of the method. The confidence level describes the " +
+          "long-run performance of the procedure: intervals built this way capture the population " +
+          "value about " + Math.round(state.conf * 100) + "% of the time.</div>" +
+          "<div><strong>What it does not mean</strong>Not a range holding " +
+          Math.round(state.conf * 100) + "% of individual observations \u2014 those are spread out by " +
+          "about s, not s/\u221An. And once this interval is computed it is a fixed pair of numbers, so " +
+          "it is not a probability statement about where a fixed population value sits.</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>" + sc.manager + " Larger " +
+          "samples generally reduce sampling uncertainty; they do not guarantee the estimate is right, " +
+          "and they do nothing about a badly drawn sample.</div></div>";
+      }
+
+      /* ------------------------------------------------------------ plots - */
+
+      /* Fixed scale per scenario: state.axis never changes while n does, so a
+         narrowing interval reads as narrowing rather than as a rescale. */
+      function renderIntervalPlot(svg, rows, height) {
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        var W = 640, L = 58, R = 58, T = 18, B = 34;
+        var pw = W - L - R;
+        var lo = state.axis[0], hi = state.axis[1];
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        var lanes = rows.length;
+        var laneH = (height - T - B) / lanes;
+
+        // baseline scale
+        var axisY = height - B + 10;
+        svg.appendChild(svgEl("line", { x1: L, y1: axisY, x2: L + pw, y2: axisY,
+          stroke: "#131313", "stroke-width": 1 }));
+        [0, 0.5, 1].forEach(function (f) {
+          var v = lo + f * (hi - lo);
+          svg.appendChild(svgEl("line", { x1: X(v), y1: axisY, x2: X(v), y2: axisY + 4, stroke: "#131313" }));
+          var tx = svgEl("text", { x: X(v), y: axisY + 17, "text-anchor": "middle", "font-size": "11",
+            fill: "#6B6B6B", "font-family": "Segoe UI, Arial, sans-serif" });
+          tx.textContent = u(v, state.sc.decimals === 2 && (hi - lo) > 50 ? 0 : 1);
+          svg.appendChild(tx);
+        });
+
+        rows.forEach(function (r, i) {
+          var y = T + laneH * i + laneH / 2;
+          var ci = r.ci;
+          // interval line
+          svg.appendChild(svgEl("line", { x1: X(ci.lower), y1: y, x2: X(ci.upper), y2: y,
+            stroke: "#131313", "stroke-width": 2 }));
+          // end caps (shape, not colour)
+          [ci.lower, ci.upper].forEach(function (v) {
+            svg.appendChild(svgEl("line", { x1: X(v), y1: y - 9, x2: X(v), y2: y + 9,
+              stroke: "#131313", "stroke-width": 2 }));
+          });
+          // point estimate
+          svg.appendChild(svgEl("circle", { cx: X(ci.mean), cy: y, r: 6,
+            fill: "#CFB991", stroke: "#131313", "stroke-width": 2 }));
+          // labels
+          var lower = svgEl("text", { x: X(ci.lower), y: y - 14, "text-anchor": "middle", "font-size": "11",
+            fill: "#131313", "font-family": "Segoe UI, Arial, sans-serif" });
+          lower.textContent = u(ci.lower);
+          svg.appendChild(lower);
+          var upper = svgEl("text", { x: X(ci.upper), y: y - 14, "text-anchor": "middle", "font-size": "11",
+            fill: "#131313", "font-family": "Segoe UI, Arial, sans-serif" });
+          upper.textContent = u(ci.upper);
+          svg.appendChild(upper);
+          var mid = svgEl("text", { x: X(ci.mean), y: y + 24, "text-anchor": "middle", "font-size": "11",
+            fill: "#131313", "font-family": "Segoe UI, Arial, sans-serif" });
+          mid.textContent = "x\u0304 = " + u(ci.mean);
+          svg.appendChild(mid);
+          var tag = svgEl("text", { x: 6, y: y + 4, "font-size": "12", fill: "#131313",
+            "font-family": "Segoe UI, Arial, sans-serif" });
+          tag.textContent = r.label;
+          svg.appendChild(tag);
+        });
+
+        svg.setAttribute("aria-label", rows.map(function (r) {
+          return r.label + ": lower limit " + u(r.ci.lower) + ", estimate " + u(r.ci.mean) +
+                 ", upper limit " + u(r.ci.upper) + ", width " + u(r.ci.width, 3);
+        }).join(". ") + ". The horizontal scale is fixed for this scenario.");
+      }
+
+      function renderCoverage() {
+        var runs = coverageRuns(H);
+        var hits = runs.filter(function (r) { return r.covers; }).length;
+        var W = 640, L = 30, R = 20, T = 16, B = 26, Ht = 250;
+        var pw = W - L - R, ph = Ht - T - B;
+        var lo = COVERAGE.mu - 1.6, hi = COVERAGE.mu + 1.6;
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        while (covSvg.firstChild) covSvg.removeChild(covSvg.firstChild);
+
+        // the fixed population value
+        svg_line(covSvg, X(COVERAGE.mu), T, X(COVERAGE.mu), T + ph, "#131313", 1.5, "4,3");
+        var lab = svgEl("text", { x: X(COVERAGE.mu) + 5, y: T + 10, "font-size": "11", fill: "#131313",
+          "font-family": "Segoe UI, Arial, sans-serif" });
+        lab.textContent = "true population mean";
+        covSvg.appendChild(lab);
+
+        runs.forEach(function (r, i) {
+          var y = T + 8 + (ph - 16) * (i / (runs.length - 1));
+          svg_line(covSvg, X(r.lower), y, X(r.upper), y, "#131313", r.covers ? 1.5 : 2.5, null);
+          [r.lower, r.upper].forEach(function (v) {
+            svg_line(covSvg, X(v), y - 4, X(v), y + 4, "#131313", r.covers ? 1.5 : 2.5, null);
+          });
+          covSvg.appendChild(svgEl("circle", { cx: X(r.mean), cy: y, r: 2.5,
+            fill: r.covers ? "#CFB991" : "#FFFFFF", stroke: "#131313", "stroke-width": 1 }));
+          if (!r.covers) {
+            var miss = svgEl("text", { x: X(r.upper) + 6, y: y + 4, "font-size": "10", fill: "#131313",
+              "font-family": "Segoe UI, Arial, sans-serif" });
+            miss.textContent = "misses";
+            covSvg.appendChild(miss);
+          }
+        });
+
+        covCap.innerHTML = "Twenty samples of " + COVERAGE.n + " drawn from one population whose mean " +
+          "really is " + COVERAGE.mu + ", each turned into a 95% interval by the same method. This " +
+          "particular set happened to capture the mean in " + hits + " of 20 intervals; the " +
+          (runs.length - hits) + " marked \u201Cmisses\u201D (thicker line, open centre) did not. " +
+          "A 95% procedure does not guarantee exactly " + hits + " successes in every batch of 20; over " +
+          "many repetitions, the capture rate approaches 95% under the method\u2019s assumptions. " +
+          "<em>This figure is a fixed, separate illustration: it stays at 95% and at its own population, " +
+          "and does not respond to the scenario or confidence-level controls above.</em>";
+        covSvg.setAttribute("aria-label", "Twenty confidence intervals from twenty different samples of " +
+          "the same population. " + hits + " of them contain the true population mean and " +
+          (runs.length - hits) + " do not.");
+      }
+
+      function svg_line(svg, x1, y1, x2, y2, stroke, w, dash) {
+        var a = { x1: x1, y1: y1, x2: x2, y2: y2, stroke: stroke, "stroke-width": w };
+        if (dash) a["stroke-dasharray"] = dash;
+        svg.appendChild(svgEl("line", a));
+      }
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

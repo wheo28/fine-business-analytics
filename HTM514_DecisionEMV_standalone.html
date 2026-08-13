@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Decision &amp; Expected Value</title>
+<meta name="description" content="Optional HTM 514 practice interactive: expected monetary value and how far a probability assumption can move before the preferred decision changes.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 2
+   "Decision & Expected Value"
+
+   Fits beside Week 11 (Decision Making with Probability). Covers one idea
+   only: EMV weights payoffs by probability, and the preferred decision can
+   flip when the probability assumption moves.
+
+   Uses the frozen shell in assets/htm514-shell.js. Nothing here writes to
+   the network or to storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ------------------------------------------------------------ scenarios - */
+  /* Each scenario: two decisions (a, b) x two states (up, down).
+     "up" is the favourable state whose probability the slider controls.
+     Values are net contribution in dollars for the period described.       */
+
+  var SCENARIOS = [
+    {
+      id: "promo",
+      label: "Hotel — promotion for next month",
+      story: "A 240-room hotel is setting next month's promotion. An aggressive rate cut fills rooms " +
+             "when demand is strong but is costly if demand does not materialize.",
+      up: "Strong demand", down: "Weak demand",
+      pStart: 0.55,
+      a: { name: "Standard promotion", up: 60000, down: 25000 },
+      b: { name: "Aggressive promotion", up: 110000, down: -20000 }
+    },
+    {
+      id: "patio",
+      label: "Restaurant — weekend patio staffing",
+      story: "A restaurant with a 60-seat patio must set the weekend schedule on Wednesday. Full staffing " +
+             "captures the whole rush; light staffing saves labour but turns guests away when it is busy.",
+      up: "Busy weekend", down: "Slow weekend",
+      pStart: 0.45,
+      a: { name: "Light staffing", up: 3200, down: 1900 },
+      b: { name: "Full staffing", up: 5400, down: 600 }
+    },
+    {
+      id: "package",
+      label: "Resort — seasonal package launch",
+      story: "A resort can extend the current package or launch a new premium package that needs upfront " +
+             "marketing and inventory commitments.",
+      up: "High interest", down: "Low interest",
+      pStart: 0.50,
+      a: { name: "Extend current package", up: 18000, down: 9000 },
+      b: { name: "Launch premium package", up: 34000, down: -6000 }
+    },
+    {
+      id: "shuttle",
+      label: "Airport hotel — shuttle capacity",
+      story: "An airport hotel is deciding whether to lease a second shuttle for the month. A single " +
+             "shuttle saves the lease but produces missed pickups and taxi vouchers on heavy arrival days.",
+      up: "Heavy arrivals", down: "Normal arrivals",
+      pStart: 0.40,
+      a: { name: "Keep one shuttle", up: 1000, down: 3000 },
+      b: { name: "Lease a second shuttle", up: 6000, down: 700 }
+    }
+  ];
+
+  /* ----------------------------------------------------------------- math - */
+  /* Full precision throughout; rounding happens only at display time.       */
+
+  function emv(option, p) { return p * option.up + (1 - p) * option.down; }
+
+  /* Probability of the favourable state at which the two EMVs are equal.
+     Returns null when the lines are parallel (no crossover) or when the
+     crossover falls outside 0..1.                                           */
+  function crossover(sc) {
+    var denom = (sc.b.up - sc.a.up) + (sc.a.down - sc.b.down);
+    if (denom === 0) return null;
+    var p = (sc.a.down - sc.b.down) / denom;
+    return (p > 0 && p < 1) ? p : null;
+  }
+
+  /* "a", "b", or "tie" at full precision. */
+  function preferred(sc, p) {
+    var d = emv(sc.a, p) - emv(sc.b, p);
+    if (d === 0) return "tie";
+    return d > 0 ? "a" : "b";
+  }
+
+  /* Everything the UI needs at one probability. Full precision internally;
+     "tooClose" is the display rule — the two EMVs round to the same dollar,
+     so claiming a winner on screen would be spurious precision.            */
+  function compare(sc, p) {
+    var ea = emv(sc.a, p), eb = emv(sc.b, p);
+    return {
+      a: ea, b: eb,
+      diff: Math.abs(ea - eb),
+      winner: preferred(sc, p),
+      tooClose: Math.round(ea) === Math.round(eb)
+    };
+  }
+
+  var core = {
+    scenarios: SCENARIOS,
+    emv: emv,
+    crossover: crossover,
+    preferred: preferred,
+    compare: compare
+  };
+
+  global.HTM514_EMV = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  /* ------------------------------------------------------------- display - */
+
+  var h = H.h;
+
+  function money(x) {
+    var v = Math.round(Math.abs(x));
+    return (x < 0 ? "\u2212$" : "$") + v.toLocaleString();
+  }
+  function pct(p) { return Math.round(p * 100) + "%"; }
+
+  /* --------------------------------------------------------- quick check - */
+
+  function quickCheck(sc) {
+    return [
+      {
+        stem: "Why can the preferred decision change when you move the probability of " +
+              sc.up.toLowerCase() + "?",
+        options: [
+          { text: "Because EMV weights each payoff by its probability, so shifting the weights changes which total is larger.",
+            correct: true,
+            why: "Right. Neither payoff table changed — only the weights did. The option whose value depends " +
+                 "most heavily on " + sc.up.toLowerCase() + " gains the most as that probability rises." },
+          { text: "Because the payoffs themselves change as the probability changes.", correct: false,
+            why: "The payoff table stays fixed. Only the probabilities move, and with them the weighted average." },
+          { text: "Because higher probabilities always favour the riskier option.", correct: false,
+            why: "Not always — it depends on which option has more to gain in that state. Drag the slider to 0 " +
+                 "and the ranking reverses." }
+        ]
+      },
+      {
+        stem: "One option has the single highest payoff in the table. Does that make it the higher-EMV choice?",
+        options: [
+          { text: "No — EMV depends on every payoff and its probability, not on the best cell alone.",
+            correct: true,
+            why: "The best case only counts as much as its probability. An option with a large upside and a " +
+                 "large downside can lose to a steadier option when the good state is not likely enough." },
+          { text: "Yes — the biggest payoff drives the expected value.", correct: false,
+            why: "Set the probability low and watch: the option with the biggest single payoff falls behind, " +
+                 "because that payoff is now carrying very little weight." }
+        ]
+      },
+      {
+        stem: "Suppose the two EMVs come out very close to each other at a probability near the " +
+              "crossover. What does that tell a manager?",
+        options: [
+          { text: "The recommendation is fragile — a small change in the probability estimate could reverse it.",
+            correct: true,
+            why: "Near the crossover, EMV is not giving you a strong recommendation. That is the moment to " +
+                 "question the probability estimate or bring in factors EMV does not capture." },
+          { text: "Either option is guaranteed to give the same result.", correct: false,
+            why: "The <em>expected</em> values are close; the actual outcomes are still far apart. Similar EMV " +
+                 "does not mean similar risk." },
+          { text: "It means the probabilities were estimated incorrectly.", correct: false,
+            why: "A near tie is a real result, not an error. It tells you the decision is sensitive to the " +
+                 "assumption, not that the assumption is wrong." }
+        ]
+      },
+      {
+        stem: "You choose the option with the higher EMV. Does that guarantee a good result next month?",
+        options: [
+          { text: "No — EMV is a probability-weighted average, not a prediction of the single outcome you will get.",
+            correct: true,
+            why: "You will get one state, not an average of both. A good decision under the stated assumptions " +
+                 "can still be followed by a poor outcome; that does not make it the wrong decision." },
+          { text: "Yes — that is what maximizing expected value means.", correct: false,
+            why: "EMV describes what you would average over many comparable decisions under these assumptions. " +
+                 "A single month can land on the unfavourable state." }
+        ]
+      },
+      {
+        stem: "You raise the probability of " + sc.up.toLowerCase() + " from 40% to 70%. What happens to " +
+              "the probability of " + sc.down.toLowerCase() + "?",
+        options: [
+          { text: "It falls from 60% to 30% — the two must sum to 1.", correct: true,
+            why: "With only two states, one probability determines the other. That is why the slider controls " +
+                 "a single number." },
+          { text: "It stays at 60% until you change it separately.", correct: false,
+            why: "Then the two would sum to 1.3. With two mutually exclusive, exhaustive states, " +
+                 "P(down) = 1 − P(up)." },
+          { text: "It also rises, because both states become more likely.", correct: false,
+            why: "Both cannot become more likely. One state occurs or the other does; the probabilities " +
+                 "always sum to 1." }
+        ]
+      }
+    ];
+  }
+
+  /* ------------------------------------------------------------ the page - */
+
+  var pageModule = {
+    title: "When does the better decision stop being better?",
+    subtitle: "Expected monetary value, and how far a probability assumption can move before the recommendation flips.",
+    courseFit: "Optional practice for Week 11 (decision making under uncertainty). About 6 minutes. " +
+               "Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { sc: SCENARIOS[0], p: SCENARIOS[0].pStart, predicted: null };
+
+      /* --- step 1: the decision --- */
+      var s1 = steps.add({ id: "decision", title: "The decision" });
+      var story = h("p", { class: "scenario-text" });
+      var table = h("table", { class: "readout" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a decision",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(table);
+      var assumption = h("p", { class: "hint" });
+      s1.body.appendChild(assumption);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Decision" }), picker])
+      ]));
+
+      /* --- step 2: predict --- */
+      var s2 = steps.add({
+        id: "predict", title: "Predict",
+        hint: "No arithmetic yet — go with your reading of the table."
+      });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* --- step 3: the EMV --- */
+      var s3 = steps.add({ id: "emv", title: "The expected monetary value", locked: true });
+      var workBox = h("div", { class: "panel" });
+      s3.body.appendChild(workBox);
+
+      /* --- step 4: change the probability --- */
+      var s4 = steps.add({
+        id: "flip", title: "Change the probability", locked: true,
+        hint: "The payoffs stay exactly where they are. Only the weights move."
+      });
+      var pRange = h("input", {
+        type: "range", id: "p-range", min: "0", max: "100", step: "1", value: "55",
+        "aria-label": "Probability of the favourable state, in percent",
+        oninput: function () { state.p = Number(this.value) / 100; renderLive(); }
+      });
+      var pLabel = h("span", { class: "checkline", id: "p-label" });
+      s4.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "p-range", id: "p-range-label" }), pRange, pLabel])
+      ]));
+      var liveTable = h("table", { class: "readout" });
+      var verdict = h("div", { class: "feedback" });
+      var chartBox = h("div", { class: "chart-box" });
+      var chartCap = h("p", { class: "cap" });
+      var canvas = h("canvas", { role: "img" });
+      chartBox.appendChild(h("h3", { text: "Expected monetary value across every probability" }));
+      chartBox.appendChild(chartCap);
+      chartBox.appendChild(canvas);
+      s4.body.appendChild(liveTable);
+      s4.body.appendChild(verdict);
+      s4.body.appendChild(chartBox);
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+
+      /* --- step 5: quick check --- */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another decision",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-decision").scrollIntoView({ block: "start" });
+          }
+        }),
+        h("button", {
+          class: "quiet", type: "button", text: "Reset this decision",
+          onclick: function () { setScenario(state.sc.id); }
+        })
+      ]));
+
+      /* --------------------------------------------------------- render --- */
+
+      function setScenario(id) {
+        state.sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.p = state.sc.pStart;
+        state.predicted = null;
+        pRange.value = String(Math.round(state.p * 100));
+        renderScenario();
+        renderPrediction();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(state.sc), 514).el);
+        workBox.innerHTML = "";
+        renderLive();
+        ["emv", "flip", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      function renderScenario() {
+        var sc = state.sc;
+        story.textContent = sc.story;
+        table.innerHTML =
+          "<caption>Net contribution next period</caption>" +
+          "<tr><th scope='col'>Decision</th><th scope='col'>" + sc.up + "</th>" +
+          "<th scope='col'>" + sc.down + "</th></tr>" +
+          "<tr><th scope='row'>" + sc.a.name + "</th><td class='num'>" + money(sc.a.up) +
+          "</td><td class='num'>" + money(sc.a.down) + "</td></tr>" +
+          "<tr><th scope='row'>" + sc.b.name + "</th><td class='num'>" + money(sc.b.up) +
+          "</td><td class='num'>" + money(sc.b.down) + "</td></tr>";
+        assumption.innerHTML = "Current assumption: <strong>P(" + sc.up + ") = " + pct(sc.pStart) +
+          "</strong>, so P(" + sc.down + ") = " + pct(1 - sc.pStart) + ". The two states are the only " +
+          "possibilities, so their probabilities always sum to 1.";
+        document.getElementById("p-range-label").textContent = "Probability of " + sc.up.toLowerCase();
+      }
+
+      function renderPrediction() {
+        var sc = state.sc;
+        predictSlot.innerHTML = "";
+        var q = {
+          stem: "At P(" + sc.up + ") = " + pct(sc.pStart) + ", which decision has the higher expected " +
+                "monetary value?",
+          shuffle: false,
+          options: [
+            { text: sc.a.name, correct: preferred(sc, sc.pStart) === "a",
+              why: "" },
+            { text: sc.b.name, correct: preferred(sc, sc.pStart) === "b",
+              why: "" }
+          ]
+        };
+        q.options.forEach(function (o) {
+          o.why = "The worked calculation is in the next step — and then the interesting part is what " +
+                  "happens when the probability moves.";
+        });
+        predictSlot.appendChild(new H.Choices(q, function (i, opt) {
+          state.predicted = opt.text;
+          renderWork();
+          ["emv", "flip", "check"].forEach(function (k) { steps.unlock(k); });
+          redrawAfterLayout();
+          H.announce("Expected values revealed below.");
+        }).el);
+      }
+
+      function renderWork() {
+        var sc = state.sc, p = sc.pStart;
+        var ea = emv(sc.a, p), eb = emv(sc.b, p);
+        var win = preferred(sc, p);
+        var winner = win === "a" ? sc.a.name : (win === "b" ? sc.b.name : "neither — they tie");
+        var right = state.predicted === winner;
+        workBox.innerHTML =
+          "<p><strong>" + sc.a.name + "</strong><br>EMV = " + pct(p) + " × " + money(sc.a.up) + " + " +
+          pct(1 - p) + " × " + money(sc.a.down) + " = <strong>" + money(ea) + "</strong></p>" +
+          "<p><strong>" + sc.b.name + "</strong><br>EMV = " + pct(p) + " × " + money(sc.b.up) + " + " +
+          pct(1 - p) + " × " + money(sc.b.down) + " = <strong>" + money(eb) + "</strong></p>" +
+          "<p>Higher expected value at this probability: <strong>" + winner + "</strong>, by " +
+          money(Math.abs(ea - eb)) + ". " +
+          (state.predicted
+            ? "You predicted " + state.predicted + " — " + (right ? "that matches." :
+              "worth seeing why: the option with the larger single payoff is not automatically ahead.")
+            : "") + "</p>";
+      }
+
+      /* The chart sizes itself from the canvas's rendered width. When step 4 is
+         still display:none the width is 0 and the fallback is used, so schedule
+         one redraw after the browser has laid the newly visible step out. */
+      function redrawAfterLayout() {
+        var draw = function () {
+          renderChart(emv(state.sc.a, state.p), emv(state.sc.b, state.p), crossover(state.sc));
+        };
+        if (typeof global.requestAnimationFrame === "function") {
+          global.requestAnimationFrame(function () { global.requestAnimationFrame(draw); });
+        } else {
+          global.setTimeout(draw, 0);
+        }
+      }
+
+      function renderLive() {
+        var sc = state.sc, p = state.p;
+        var cmp = compare(sc, p);
+        var ea = cmp.a, eb = cmp.b, win = cmp.winner, diff = cmp.diff, tooClose = cmp.tooClose;
+        var star = crossover(sc);
+
+        pLabel.textContent = "P(" + sc.up.toLowerCase() + ") = " + pct(p) +
+          "  ·  P(" + sc.down.toLowerCase() + ") = " + pct(1 - p);
+
+        liveTable.innerHTML =
+          "<caption>At P(" + sc.up + ") = " + pct(p) + "</caption>" +
+          "<tr><th scope='col'>Decision</th><th scope='col'>Calculation</th><th scope='col'>EMV</th></tr>" +
+          "<tr><th scope='row'>" + sc.a.name + "</th><td>" + pct(p) + " × " + money(sc.a.up) + " + " +
+          pct(1 - p) + " × " + money(sc.a.down) + "</td><td class='num'>" + money(ea) + "</td></tr>" +
+          "<tr><th scope='row'>" + sc.b.name + "</th><td>" + pct(p) + " × " + money(sc.b.up) + " + " +
+          pct(1 - p) + " × " + money(sc.b.down) + "</td><td class='num'>" + money(eb) + "</td></tr>";
+
+        var line;
+        if (tooClose) {
+          line = "<span class='verdict'>Too close to call.</span> The two expected values differ by less " +
+                 "than $1 at this probability. EMV is not giving you a recommendation here.";
+          verdict.setAttribute("data-verdict", "");
+        } else {
+          line = "<span class='verdict'>Higher EMV: " + (win === "a" ? sc.a.name : sc.b.name) + "</span> " +
+                 "by " + money(diff) + ".";
+          verdict.setAttribute("data-verdict", "ok");
+        }
+        if (star !== null) {
+          var lowSide = preferred(sc, star / 2) === "a" ? sc.a : sc.b;
+          var highSide = lowSide === sc.a ? sc.b : sc.a;
+          line += " The two are equal at P(" + sc.up.toLowerCase() + ") = <strong>" +
+            (star * 100).toFixed(1) + "%</strong>. Below that, " + lowSide.name +
+            " has the higher EMV; above it, " + highSide.name + " does.";
+          if (Math.abs(p - star) <= 0.03 && !tooClose) {
+            line += " You are within three points of that crossover — this recommendation is fragile.";
+          }
+        }
+        verdict.innerHTML = line;
+
+        renderChart(ea, eb, star);
+        renderMeaning(star);
+        H.announce("Probability " + pct(p) + ". " + verdict.textContent);
+      }
+
+      function renderMeaning(star) {
+        var sc = state.sc;
+        meaning.innerHTML =
+          "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What EMV means</strong>The probability-weighted average payoff across repeated " +
+          "comparable decisions, under the probabilities and payoffs you have assumed.</div>" +
+          "<div><strong>What it does not mean</strong>The amount you will actually receive next period. " +
+          "One period delivers one state, not an average, so the higher-EMV choice can still be followed " +
+          "by the worse result.</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>\"Under these payoffs and these " +
+          "probabilities, " + sc.a.name.toLowerCase() + " and " + sc.b.name.toLowerCase() + " differ in " +
+          "expected value" + (star !== null ? ", and the ranking turns over near P(" + sc.up.toLowerCase() +
+          ") = " + (star * 100).toFixed(0) + "%" : "") + ". Our estimate needs to be defensible on the " +
+          "right side of that line.\"</div></div>";
+      }
+
+      /* Two straight EMV lines over p, distinguished by solid vs dashed and
+         by end labels — never by colour alone. */
+      function renderChart(ea, eb, star) {
+        var sc = state.sc;
+        var dpr = global.devicePixelRatio || 1;
+        var W = canvas.clientWidth || 620, Ht = 210;
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(Ht * dpr);
+        canvas.style.height = Ht + "px";
+        var g = canvas.getContext("2d");
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        g.clearRect(0, 0, W, Ht);
+
+        var padL = 8, padR = 116, padT = 12, padB = 26;
+        var plotW = W - padL - padR, plotH = Ht - padT - padB;
+        var vals = [sc.a.up, sc.a.down, sc.b.up, sc.b.down];
+        var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+        var span = (hi - lo) || 1;
+        lo -= span * 0.08; hi += span * 0.08;
+        var X = function (p) { return padL + p * plotW; };
+        var Y = function (v) { return padT + plotH - ((v - lo) / (hi - lo)) * plotH; };
+
+        // zero line, if it is in range
+        if (lo < 0 && hi > 0) {
+          g.strokeStyle = "#DCDCDC"; g.lineWidth = 1;
+          g.beginPath(); g.moveTo(padL, Y(0)); g.lineTo(padL + plotW, Y(0)); g.stroke();
+          g.fillStyle = "#6B6B6B"; g.font = "11px Segoe UI, Arial, sans-serif";
+          g.fillText("$0", padL + 2, Y(0) - 3);
+        }
+
+        // the two EMV lines
+        [[sc.a, [], "#131313"], [sc.b, [6, 4], "#8E7B4F"]].forEach(function (spec) {
+          var opt = spec[0];
+          g.save();
+          g.strokeStyle = spec[2]; g.lineWidth = 2; g.setLineDash(spec[1]);
+          g.beginPath(); g.moveTo(X(0), Y(opt.down)); g.lineTo(X(1), Y(opt.up)); g.stroke();
+          g.restore();
+          g.fillStyle = "#131313"; g.font = "12px Segoe UI, Arial, sans-serif";
+          g.fillText(opt.name, padL + plotW + 8, Y(opt.up) + 4);
+        });
+
+        // crossover
+        if (star !== null) {
+          g.save();
+          g.strokeStyle = "#131313"; g.setLineDash([2, 3]); g.lineWidth = 1;
+          g.beginPath(); g.moveTo(X(star), padT); g.lineTo(X(star), padT + plotH); g.stroke();
+          g.restore();
+          g.fillStyle = "#131313"; g.font = "11px Segoe UI, Arial, sans-serif";
+          g.fillText("decision flips at " + (star * 100).toFixed(0) + "%",
+            Math.min(X(star) + 4, padL + plotW - 118), padT + 11);
+        }
+
+        // current probability marker
+        g.fillStyle = "#CFB991";
+        g.strokeStyle = "#131313"; g.lineWidth = 1;
+        [[sc.a, ea], [sc.b, eb]].forEach(function (pair) {
+          g.beginPath(); g.arc(X(state.p), Y(pair[1]), 4.5, 0, Math.PI * 2);
+          g.fill(); g.stroke();
+        });
+        g.save();
+        g.strokeStyle = "#131313"; g.lineWidth = 1.5; g.setLineDash([]);
+        g.beginPath(); g.moveTo(X(state.p), padT + plotH); g.lineTo(X(state.p), padT + plotH + 5); g.stroke();
+        g.restore();
+
+        g.fillStyle = "#6B6B6B"; g.font = "11px Segoe UI, Arial, sans-serif";
+        g.fillText("P(" + sc.up.toLowerCase() + ") = 0", padL, Ht - 8);
+        var rl = "100%";
+        g.fillText(rl, padL + plotW - g.measureText(rl).width, Ht - 8);
+
+        chartCap.textContent = "Solid line: " + sc.a.name + ". Dashed line: " + sc.b.name +
+          ". Dots mark the current probability.";
+        canvas.setAttribute("aria-label",
+          "Line chart of expected monetary value against the probability of " + sc.up.toLowerCase() +
+          ". " + sc.a.name + " runs from " + money(sc.a.down) + " to " + money(sc.a.up) + "; " +
+          sc.b.name + " runs from " + money(sc.b.down) + " to " + money(sc.b.up) +
+          (star !== null ? ". The lines cross at " + (star * 100).toFixed(1) + " percent." : "."));
+      }
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+      global.addEventListener("resize", function () {
+        renderChart(emv(state.sc.a, state.p), emv(state.sc.b, state.p), crossover(state.sc));
+      });
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

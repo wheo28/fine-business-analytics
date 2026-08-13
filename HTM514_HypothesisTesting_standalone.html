@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Hypothesis Testing &amp; p-value Explorer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: how the observed difference, sample size, and variability move a t statistic and its p-value.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 5
+   "Hypothesis Testing & p-value Explorer"
+
+   Fits beside Week 12 (Hypothesis Testing and Confidence Interval
+   Estimation). One idea only: a test asks how surprising the observed
+   result would be if the null benchmark were true, and the answer moves
+   with the observed difference, the sample size, and the variability.
+
+   Method: one-sample two-sided t test of a mean, df = n - 1, matching the
+   Week 12 deck ("substituting sigma with s leads to the t distribution,
+   which depends upon the degrees of freedom, df = n - 1").
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ================================================================= math ==
+     Self-contained t machinery, the same implementation used in Module 4 and
+     duplicated here deliberately so this package deploys on its own (Module 4
+     is frozen and its files are not imported).
+
+     P(|T| > t) with df degrees of freedom equals the regularized incomplete
+     beta I_x(df/2, 1/2) with x = df/(df + t^2), evaluated by the standard
+     continued fraction (Lentz) with a Lanczos log-gamma. The two-sided
+     p-value IS that tail probability; critical values are recovered from it
+     by bisection.
+     ====================================================================== */
+
+  function lnGamma(z) {
+    var g = [676.5203681218851, -1259.1392167224028, 771.32342877765313,
+             -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+             9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
+    z -= 1;
+    var x = 0.99999999999980993, i;
+    for (i = 0; i < 8; i++) x += g[i] / (z + i + 1);
+    var t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+
+  function betacf(a, b, x) {
+    var MAXIT = 200, EPS = 3e-14, FPMIN = 1e-300;
+    var qab = a + b, qap = a + 1, qam = a - 1;
+    var c = 1, d = 1 - qab * x / qap, h, m, m2, aa, del;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    d = 1 / d; h = d;
+    for (m = 1; m <= MAXIT; m++) {
+      m2 = 2 * m;
+      aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; h *= d * c;
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d; del = d * c; h *= del;
+      if (Math.abs(del - 1) < EPS) break;
+    }
+    return h;
+  }
+
+  function betai(a, b, x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    var bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) +
+                      a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2)
+      ? bt * betacf(a, b, x) / a
+      : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+
+  /* Two-sided p-value for a t statistic. */
+  function pTwoSided(t, df) {
+    if (!(df > 0) || !isFinite(t)) return null;
+    if (t === 0) return 1;
+    return betai(df / 2, 0.5, df / (df + t * t));
+  }
+
+  /* Two-sided critical value, used only to draw the matching interval. */
+  function tCrit(conf, df) {
+    if (!(df > 0) || !(conf > 0) || !(conf < 1)) return null;
+    var target = 1 - conf, lo = 0, hi = 100, mid, i;
+    for (i = 0; i < 200; i++) {
+      mid = (lo + hi) / 2;
+      if (pTwoSided(mid, df) > target) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  /* Student density, for the tail picture only. */
+  function tDensity(t, df) {
+    return Math.exp(lnGamma((df + 1) / 2) - lnGamma(df / 2)) /
+           Math.sqrt(df * Math.PI) * Math.pow(1 + t * t / df, -(df + 1) / 2);
+  }
+
+  /* The whole test at full precision. Returns null for inputs that cannot
+     produce one, so nothing downstream ever formats a NaN. */
+  function test(mu0, mean, s, n, alpha) {
+    if (!isFinite(mu0) || !isFinite(mean) || !(s >= 0) || !(n >= 2) ||
+        !(alpha > 0) || !(alpha < 1)) return null;
+    var df = n - 1;
+    var se = s / Math.sqrt(n);
+    var diff = mean - mu0;
+    if (se === 0) {
+      // No variability: the test statistic is undefined (0/0 when diff is 0,
+      // unbounded otherwise). Reported honestly rather than as NaN.
+      return { mu0: mu0, mean: mean, s: s, n: n, df: df, alpha: alpha,
+               se: 0, diff: diff, t: null, p: null, reject: null, degenerate: true };
+    }
+    var t = diff / se;
+    var p = pTwoSided(t, df);
+    return { mu0: mu0, mean: mean, s: s, n: n, df: df, alpha: alpha,
+             se: se, diff: diff, t: t, p: p, reject: p < alpha, degenerate: false };
+  }
+
+  /* Display rule for a p-value. Full precision decides; this only prints. */
+  function fmtP(p) {
+    if (p === null) return "\u2014";
+    if (p < 0.001) return "p < .001";
+    if (p > 0.999) return "p > .999";
+    return "p = " + p.toFixed(3).replace(/^0/, "");
+  }
+
+  var core = { lnGamma: lnGamma, betai: betai, pTwoSided: pTwoSided, tCrit: tCrit,
+               tDensity: tDensity, test: test, fmtP: fmtP };
+
+  /* ============================================================= content == */
+
+  var ALPHAS = [0.01, 0.05, 0.10];
+  var N_MIN = 10, N_MAX = 300;
+
+  var SCENARIOS = [
+    {
+      id: "checkin",
+      label: "Hotel — check-in time against the historical benchmark",
+      unit: { suffix: " min" }, decimals: 2,
+      mu0: 7.0, mean0: 6.6, s0: 1.5, n0: 40,
+      meanRange: [5.8, 8.2], meanStep: 0.05,
+      sRange: [0.5, 4.0], sStep: 0.1,
+      story: "Check-in has historically averaged 7.0 minutes. After a process change, a random sample " +
+             "of 40 recent check-ins averages 6.6 minutes with a sample standard deviation of 1.5 " +
+             "minutes. Is the new average different from the benchmark?",
+      param: "average check-in time",
+      caseA: { n: 12, diff: -0.9 }, caseB: { n: 250, diff: -0.2 },
+      caseNote: "a difference of 54 seconds against a difference of 12 seconds"
+    },
+    {
+      id: "wait",
+      label: "Restaurant — Friday wait against the service target",
+      unit: { suffix: " min" }, decimals: 2,
+      mu0: 15.0, mean0: 16.6, s0: 4.4, n0: 35,
+      meanRange: [12.0, 19.0], meanStep: 0.05,
+      sRange: [2.0, 9.0], sStep: 0.1,
+      story: "The service target for a Friday-evening wait is 15.0 minutes. A random sample of 35 " +
+             "parties averages 16.6 minutes with a sample standard deviation of 4.4 minutes. Is the " +
+             "typical wait different from the target?",
+      param: "average Friday wait",
+      caseA: { n: 12, diff: 2.6 }, caseB: { n: 250, diff: 0.6 },
+      caseNote: "a difference of about two and a half minutes against a difference of 36 seconds"
+    },
+    {
+      id: "satisfaction",
+      label: "Hotel — satisfaction against the brand benchmark",
+      unit: { suffix: " / 10" }, decimals: 2,
+      mu0: 8.5, mean0: 8.2, s0: 1.1, n0: 45,
+      meanRange: [7.4, 9.6], meanStep: 0.02,
+      sRange: [0.4, 2.5], sStep: 0.05,
+      story: "The brand benchmark for guest satisfaction is 8.5 out of 10. A random sample of 45 " +
+             "departing guests at one property averages 8.2 with a sample standard deviation of 1.1. " +
+             "Is this property different from the benchmark?",
+      param: "average satisfaction score",
+      caseA: { n: 12, diff: -0.65 }, caseB: { n: 250, diff: -0.15 },
+      caseNote: "a difference of 0.65 points against a difference of 0.15 points"
+    }
+  ];
+
+  core.scenarios = SCENARIOS;
+  core.alphas = ALPHAS;
+  core.nRange = [N_MIN, N_MAX];
+
+  global.HTM514_HT = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag), k;
+    for (k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* ========================================================== quick check == */
+
+  function quickCheck(sc) {
+    return [
+      {
+        stem: "What does a p-value measure?",
+        options: [
+          { text: "How likely a result at least this far from the benchmark would be, if the null " +
+                  "hypothesis were true.", correct: true,
+            why: "The whole calculation is carried out <em>assuming</em> the null. A small p means the " +
+                 "observed result sits far out in the distribution the null predicts." },
+          { text: "The probability that the null hypothesis is true.", correct: false,
+            why: "The null is a claim about the population, not an event with a probability here. The " +
+                 "p-value is computed by assuming it and then asking how unusual the data would be." },
+          { text: "The probability that the result would replicate.", correct: false,
+            why: "Nothing in the calculation refers to a future study. It describes this sample under " +
+                 "the null model." }
+        ]
+      },
+      {
+        stem: "The test returns p = .03. Which reading is correct?",
+        options: [
+          { text: "If the null hypothesis were true, results at least this extreme would occur about " +
+                  "3% of the time under the model.", correct: true,
+            why: "That is exactly what the two tails add up to. Notice everything in that sentence is " +
+                 "conditional on the null being true." },
+          { text: "There is a 3% probability that the null hypothesis is true.", correct: false,
+            why: "The direction of the conditioning is reversed. The p-value is computed from the null, " +
+                 "not about it." },
+          { text: "There is a 97% probability that the alternative hypothesis is true.", correct: false,
+            why: "Same reversal. A p-value never assigns a probability to a hypothesis." },
+          { text: "The result has a 97% chance of replicating.", correct: false,
+            why: "Replication depends on the true effect, the next sample size, and chance. The p-value " +
+                 "says nothing about it." }
+        ]
+      },
+      {
+        stem: "The test returns p = .28 at \u03B1 = .05. What can the manager conclude?",
+        options: [
+          { text: "The sample does not provide strong enough evidence against the null at this " +
+                  "significance level.", correct: true,
+            why: "That is a statement about the evidence, not about the truth. A real difference may " +
+                 "exist and this sample may simply be too small or too noisy to detect it." },
+          { text: "The null hypothesis has been proven true.", correct: false,
+            why: "A test never proves the null. Not finding strong evidence is not the same as showing " +
+                 "there is nothing to find." },
+          { text: "There is no difference in the population.", correct: false,
+            why: "The course puts this carefully: nonsignificant means \u201Cnot different\u201D as a " +
+                 "finding about the evidence, not a demonstration that the population values are equal." }
+        ]
+      },
+      {
+        stem: "You move the observed sample mean farther from the benchmark, holding s and n fixed. " +
+              "What happens to the p-value?",
+        options: [
+          { text: "It falls, because the same standard error now covers a larger difference.", correct: true,
+            why: "The t statistic is the difference measured in standard errors. A bigger numerator over " +
+                 "the same denominator puts the result farther into the tails." },
+          { text: "It rises, because the result is more unusual.", correct: false,
+            why: "More unusual under the null means a <em>smaller</em> p-value. The p-value is the tail " +
+                 "area beyond the observed statistic." },
+          { text: "It does not change unless n changes.", correct: false,
+            why: "Both the difference and n matter. Try the primary slider and watch." }
+        ]
+      },
+      {
+        stem: "n rises from 40 to 300 while the observed difference and s stay exactly the same. " +
+              "What has happened?",
+        options: [
+          { text: "The effect is unchanged; the standard error is smaller, so the same difference is " +
+                  "now easier to detect.", correct: true,
+            why: "This is the connection back to the sampling module. Bigger samples do not create " +
+                 "bigger effects \u2014 they shrink the uncertainty against which the effect is measured." },
+          { text: "The difference between the sample and the benchmark has grown.", correct: false,
+            why: "Look at the readout: the observed difference is the number you set, and n never touches " +
+                 "it. Only s/\u221An moves." },
+          { text: "Nothing changes, because the sample mean did not move.", correct: false,
+            why: "The numerator is fixed, but the denominator falls, so |t| grows and p falls." }
+        ]
+      },
+      {
+        stem: "A result is statistically significant at \u03B1 = .05. Does that mean it matters to the business?",
+        options: [
+          { text: "No \u2014 significance addresses evidence relative to sampling uncertainty, not the " +
+                  "size or value of the difference.", correct: true,
+            why: "With a large enough sample a very small difference becomes detectable. Whether " +
+                 "twelve seconds of check-in time is worth a process change is a management question, " +
+                 "not a statistical one." },
+          { text: "Yes \u2014 significant means the effect is large.", correct: false,
+            why: "Significance has no size attached. Compare the two cases above: the larger difference " +
+                 "is the one that is <em>not</em> significant." },
+          { text: "Yes, provided the p-value is below .01.", correct: false,
+            why: "A smaller p means stronger evidence against the null, still with nothing said about " +
+                 "magnitude or business value." }
+        ]
+      },
+      {
+        stem: "You switch \u03B1 from .05 to .01. What changes?",
+        options: [
+          { text: "The decision rule changes; the p-value does not.", correct: true,
+            why: "\u03B1 is chosen before seeing the data and sets how much evidence you demand. The " +
+                 "p-value is computed from the sample and does not know what \u03B1 you picked." },
+          { text: "The p-value gets smaller, because the test is stricter.", correct: false,
+            why: "Watch the readout while you switch levels: the p-value does not move at all. Only the " +
+                 "verdict can." },
+          { text: "Both change together.", correct: false,
+            why: "Only the threshold moves. That is why reporting the p-value itself is more informative " +
+                 "than reporting only a verdict." }
+        ]
+      },
+      {
+        stem: "Two properties report the same difference from the benchmark, but one has much more " +
+              "variable " + sc.param.replace("average ", "") + ". Which is harder to call significant?",
+        options: [
+          { text: "The more variable one \u2014 a larger s means a larger standard error and a smaller |t|.",
+            correct: true,
+            why: "Noise widens the yardstick. The same difference measured in bigger standard errors " +
+                 "sits closer to the middle of the null distribution." },
+          { text: "The less variable one, because low variability is suspicious.", correct: false,
+            why: "Lower variability makes the estimate more precise, which makes a given difference " +
+                 "easier, not harder, to distinguish from the benchmark." },
+          { text: "Variability does not affect the test.", correct: false,
+            why: "It is the denominator of the test statistic. Move the variability slider and watch the " +
+                 "p-value climb." }
+        ]
+      }
+    ];
+  }
+
+  /* =============================================================== page === */
+
+  var pageModule = {
+    title: "How surprising is this result?",
+    subtitle: "A one-sample t test, and what moves the p-value: the difference, the sample size, and the noise.",
+    courseFit: "Optional practice for Week 12 (Hypothesis Testing and Confidence Interval Estimation). " +
+               "About 8 minutes. Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      /* meanFlipped is set only by the sample-mean control crossing the
+         boundary — see moveMean(). Changing n, s, or alpha can flip the verdict
+         too, but the Step 3 task asks specifically about moving the mean, so
+         those must not complete it. */
+      var state = { sc: SCENARIOS[0], mean: 0, s: 0, n: 0, alpha: 0.05, axis: null, meanFlipped: false };
+
+      /* --- step 1: the question ------------------------------------------ */
+      var s1 = steps.add({ id: "question", title: "The question" });
+      var story = h("p", { class: "scenario-text" });
+      var hyp = h("div", { class: "panel" });
+      var facts = h("table", { class: "readout" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a scenario",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(story);
+      s1.body.appendChild(hyp);
+      s1.body.appendChild(facts);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Scenario" }), picker])
+      ]));
+
+      /* --- step 2: predict ------------------------------------------------ */
+      var s2 = steps.add({
+        id: "predict", title: "Predict",
+        hint: "No arithmetic — just your read of how far the sample sits from the benchmark."
+      });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* --- step 3: run the test ------------------------------------------- */
+      var s3 = steps.add({
+        id: "test", title: "The test", locked: true,
+        hint: "Move the sample mean and watch the statistic, the tails, and the verdict move with it."
+      });
+      var meanRange = h("input", {
+        type: "range", id: "mean-range", "aria-label": "Observed sample mean",
+        oninput: function () { moveMean(Number(this.value)); }
+      });
+      var meanLab = h("label", { for: "mean-range", id: "mean-lab" });
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [meanLab, meanRange]),
+        h("button", { class: "quiet", type: "button", text: "Back to the observed sample",
+          onclick: function () { restore(); } })
+      ]));
+      var scaleBox = h("div", { class: "chart-box" });
+      var scaleSvg = svgEl("svg", { viewBox: "0 0 640 110", role: "img", style: "width:100%;height:auto" });
+      scaleBox.appendChild(scaleSvg);
+      var scaleCap = h("p", { class: "cap" });
+      scaleBox.appendChild(scaleCap);
+      s3.body.appendChild(scaleBox);
+      var tailBox = h("div", { class: "chart-box" });
+      var tailSvg = svgEl("svg", { viewBox: "0 0 640 170", role: "img", style: "width:100%;height:auto" });
+      tailBox.appendChild(h("h3", { text: "Where the result falls under the null model" }));
+      tailBox.appendChild(tailSvg);
+      var tailCap = h("p", { class: "cap" });
+      tailBox.appendChild(tailCap);
+      s3.body.appendChild(tailBox);
+      var numbers = h("table", { class: "readout" });
+      s3.body.appendChild(numbers);
+      var verdict = h("div", { class: "feedback" });
+      s3.body.appendChild(verdict);
+      var threshold = h("div", { class: "panel" });
+      s3.body.appendChild(threshold);
+
+      /* --- step 4: what else moves it -------------------------------------- */
+      var s4 = steps.add({
+        id: "more", title: "Sample size, noise, and what significance does not tell you", locked: true
+      });
+      var nRange = h("input", {
+        type: "range", id: "n-range", min: String(N_MIN), max: String(N_MAX), step: "1",
+        "aria-label": "Sample size n",
+        oninput: function () { state.n = Number(this.value); renderAll(); }
+      });
+      var sRange = h("input", {
+        type: "range", id: "s-range", "aria-label": "Sample standard deviation",
+        oninput: function () { state.s = Number(this.value); renderAll(); }
+      });
+      var nLab = h("label", { for: "n-range", id: "n-lab" });
+      var sLab = h("label", { for: "s-range", id: "s-lab" });
+      s4.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [nLab, nRange]),
+        h("div", { class: "control" }, [sLab, sRange])
+      ]));
+      var effectLine = h("p", { class: "hint" });
+      s4.body.appendChild(effectLine);
+      var caution = h("p", { class: "hint", hidden: "hidden" });
+      s4.body.appendChild(caution);
+
+      var alphaBtns = h("div", { class: "controls" });
+      ALPHAS.forEach(function (a) {
+        alphaBtns.appendChild(h("button", {
+          type: "button", "data-alpha": String(a), text: "\u03B1 = " + String(a).replace(/^0/, ""),
+          onclick: function () { state.alpha = a; renderAll(); }
+        }));
+      });
+      s4.body.appendChild(h("p", { class: "hint", text: "In a planned analysis, \u03B1 should be " +
+        "specified before inspecting the result. The controls below are for seeing how the decision " +
+        "rule changes." }));
+      s4.body.appendChild(alphaBtns);
+      var alphaLine = h("p", {});
+      s4.body.appendChild(alphaLine);
+
+      var cases = h("div", { class: "panel" });
+      s4.body.appendChild(cases);
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+
+      /* --- step 5: quick check --------------------------------------------- */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another scenario",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-question").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* -------------------------------------------------------- formatting - */
+
+      function u(v, d) {
+        var sc = state.sc, dec = d === undefined ? sc.decimals : d;
+        if (!isFinite(v)) return "\u2014";
+        return (v < 0 ? "\u2212" : "") + (sc.unit.prefix || "") +
+               Math.abs(v).toFixed(dec) + (sc.unit.suffix || "");
+      }
+      function signed(v, d) {
+        var dec = d === undefined ? state.sc.decimals : d;
+        return (v > 0 ? "+" : (v < 0 ? "\u2212" : "")) + Math.abs(v).toFixed(dec) +
+               (state.sc.unit.suffix || "");
+      }
+      function alphaText(a) { return String(a).replace(/^0/, ""); }
+
+      /* ---------------------------------------------------------- scenario - */
+
+      function setScenario(id) {
+        var sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.sc = sc;
+        state.mean = sc.mean0; state.s = sc.s0; state.n = sc.n0;
+        state.alpha = 0.05; state.meanFlipped = false;
+        meanRange.min = sc.meanRange[0]; meanRange.max = sc.meanRange[1]; meanRange.step = sc.meanStep;
+        meanRange.value = String(state.mean);
+        sRange.min = sc.sRange[0]; sRange.max = sc.sRange[1]; sRange.step = sc.sStep;
+        sRange.value = String(state.s);
+        nRange.value = String(state.n);
+        // Fixed axis for the estimate scale: wide enough for the whole slider
+        // range plus the widest interval it can carry, so it never rescales.
+        var lo = Math.min(sc.meanRange[0], sc.mu0), hi = Math.max(sc.meanRange[1], sc.mu0);
+        var pad = (hi - lo) * 0.06;
+        state.axis = [lo - pad, hi + pad];
+        story.textContent = sc.story;
+        hyp.innerHTML = "<h3>The hypotheses</h3>" +
+          "<p><strong>H\u2080: \u03BC = " + u(sc.mu0) + "</strong> \u2014 the " + sc.param +
+          " is the benchmark.<br>" +
+          "<strong>H\u2081: \u03BC \u2260 " + u(sc.mu0) + "</strong> \u2014 it is different, in either " +
+          "direction. Two-sided, because a change in either direction would matter.</p>";
+        renderFacts();
+        renderPrediction();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(sc), 915).el);
+        renderAll();
+        ["test", "more", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      /* The only path that can complete the "find the switch" task: compare the
+         verdict before and after this one control moves, holding n, s and alpha
+         fixed. Reset and scenario switching deliberately do not count. */
+      function moveMean(v) {
+        var sc = state.sc;
+        var before = test(sc.mu0, state.mean, state.s, state.n, state.alpha);
+        state.mean = v;
+        var after = test(sc.mu0, state.mean, state.s, state.n, state.alpha);
+        if (before && after && !before.degenerate && !after.degenerate &&
+            before.reject !== after.reject) state.meanFlipped = true;
+        renderAll();
+      }
+
+      function restore() {
+        state.mean = state.sc.mean0; state.s = state.sc.s0; state.n = state.sc.n0;
+        meanRange.value = String(state.mean);
+        sRange.value = String(state.s);
+        nRange.value = String(state.n);
+        renderAll();
+      }
+
+      function renderFacts() {
+        var sc = state.sc;
+        facts.innerHTML = "<caption>What we have</caption>" +
+          "<tr><th scope='row'>Benchmark (\u03BC\u2080)</th><td class='num'>" + u(sc.mu0) + "</td></tr>" +
+          "<tr><th scope='row'>Sample mean (x\u0304)</th><td class='num'>" + u(sc.mean0) + "</td></tr>" +
+          "<tr><th scope='row'>Sample standard deviation (s)</th><td class='num'>" + u(sc.s0) + "</td></tr>" +
+          "<tr><th scope='row'>Sample size (n)</th><td class='num'>" + sc.n0 + "</td></tr>" +
+          "<tr><th scope='row'>Significance level (\u03B1)</th><td class='num'>.05</td></tr>";
+      }
+
+      function renderPrediction() {
+        predictSlot.innerHTML = "";
+        var q = {
+          stem: "Based on this sample result, do you expect the evidence against the null hypothesis " +
+                "to be strong enough to reach p &lt; .05?",
+          shuffle: false,
+          options: [
+            { text: "Yes", correct: null, why: "" },
+            { text: "No", correct: null, why: "" },
+            { text: "Not sure", correct: null, why: "" }
+          ]
+        };
+        var r = test(state.sc.mu0, state.sc.mean0, state.sc.s0, state.sc.n0, 0.05);
+        var reveal = "The test gives t = " + r.t.toFixed(3) + " on " + r.df + " degrees of freedom, " +
+          "so " + fmtP(r.p) + " \u2014 " + (r.reject
+            ? "strong enough to reject H\u2080 at \u03B1 = .05."
+            : "not strong enough to reject H\u2080 at \u03B1 = .05.") +
+          " Eyeballing the gap is hard precisely because it has to be judged against the standard error, " +
+          "which is what the test does for you. The working is below.";
+        q.options.forEach(function (o) { o.why = reveal; o.correct = true; });
+        predictSlot.appendChild(new H.Choices(q, function () {
+          ["test", "more", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("The test result is shown below.");
+        }).el);
+      }
+
+      /* ------------------------------------------------------------ render - */
+
+      function renderAll() {
+        var sc = state.sc;
+        var r = test(sc.mu0, state.mean, state.s, state.n, state.alpha);
+        meanLab.textContent = "Observed sample mean (x\u0304 = " + u(state.mean) + ")";
+        nLab.textContent = "Sample size (n = " + state.n + ")";
+        sLab.textContent = "Sample standard deviation (s = " + u(state.s) + ")";
+        Array.prototype.forEach.call(alphaBtns.children, function (b) {
+          var on = Number(b.getAttribute("data-alpha")) === state.alpha;
+          b.className = on ? "primary" : "";
+          b.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        renderScale(r);
+        renderTails(r);
+        renderNumbers(r);
+        renderVerdict(r);
+        renderThreshold(r);
+        renderEffect(r);
+        renderCaution();
+        renderAlphaLine(r);
+        renderCases();
+        renderMeaning(r);
+      }
+
+      function renderNumbers(r) {
+        numbers.innerHTML =
+          "<caption>The working</caption>" +
+          row("Observed difference (x\u0304 \u2212 \u03BC\u2080)", r.degenerate ? signed(r.diff) : signed(r.diff)) +
+          row("Standard error (s/\u221An)", u(r.se, 3)) +
+          row("t = difference / standard error", r.degenerate ? "\u2014" : r.t.toFixed(3)) +
+          row("Degrees of freedom (n \u2212 1)", String(r.df)) +
+          row("Two-sided p-value", r.degenerate ? "\u2014" : fmtP(r.p).replace("p = ", "").replace("p ", "")) +
+          row("Decision at \u03B1 = " + alphaText(state.alpha),
+              r.degenerate ? "\u2014" : (r.reject ? "Reject H\u2080" : "Do not reject H\u2080"));
+      }
+      function row(k, v) { return "<tr><th scope='row'>" + k + "</th><td class='num'>" + v + "</td></tr>"; }
+
+      function renderVerdict(r) {
+        if (r.degenerate) {
+          verdict.setAttribute("data-verdict", "");
+          verdict.innerHTML = "<span class='verdict'>No test is possible here.</span> With a sample " +
+            "standard deviation of zero there is no sampling variability to measure the difference " +
+            "against, so the t statistic is undefined.";
+          return;
+        }
+        verdict.setAttribute("data-verdict", r.reject ? "ok" : "");
+        verdict.innerHTML = "<span class='verdict'>" + fmtP(r.p) + "</span> \u2014 if H\u2080 were true, " +
+          "a test statistic at least as extreme as this one would occur about " +
+          (r.p < 0.001 ? "less than 0.1%" : (r.p * 100).toFixed(1) + "%") + " of the time. " +
+          (r.reject
+            ? "<strong>Reject H\u2080 at \u03B1 = " + alphaText(state.alpha) + ".</strong> The data " +
+              "provide evidence against the null hypothesis."
+            : "<strong>Do not reject H\u2080 at \u03B1 = " + alphaText(state.alpha) + ".</strong> This " +
+              "sample does not provide strong enough evidence against the null hypothesis \u2014 which " +
+              "is not the same as showing the benchmark is correct.") +
+          (roundingCollision(r)
+            ? " (The displayed p-value is rounded to three decimals; the decision uses the unrounded value, " +
+              "which is " + (r.p < state.alpha ? "just below" : "just above") + " \u03B1.)"
+            : "");
+        H.announce(fmtP(r.p) + ". " + (r.reject ? "Reject" : "Do not reject") + " the null hypothesis.");
+      }
+
+      /* True when the rounded p-value would suggest the opposite verdict to the
+         one the unrounded value gives. Displayed text then says so explicitly. */
+      function roundingCollision(r) {
+        if (r.degenerate) return false;
+        var shown = Number(r.p.toFixed(3));
+        return (r.p < state.alpha) !== (shown < state.alpha);
+      }
+
+      function renderThreshold(r) {
+        if (r.degenerate) { threshold.innerHTML = ""; return; }
+        var sc = state.sc;
+        var crit = tCrit(1 - state.alpha, r.df);
+        var edgeLow = sc.mu0 - crit * r.se, edgeHigh = sc.mu0 + crit * r.se;
+        threshold.innerHTML =
+          "<h3>Find the switch</h3>" +
+          "<p>Move the sample mean until the verdict changes. At the current n and s, the decision " +
+          "flips at <strong>" + u(edgeLow) + "</strong> and <strong>" + u(edgeHigh) + "</strong> \u2014 " +
+          "the sample mean values sitting exactly " + crit.toFixed(3) + " standard errors from the " +
+          "benchmark.</p>" +
+          (state.meanFlipped
+            ? "<p><strong>You found it.</strong> Nothing about the population changed when the verdict " +
+              "flipped. The observed result crossed a threshold defined relative to its own standard " +
+              "error \u2014 which is why a verdict alone is a thin summary, and why the p-value itself " +
+              "is worth reporting.</p>"
+            : "<p class='hint'>Currently: " + (r.reject ? "statistically significant" :
+               "not statistically significant") + " at \u03B1 = " + alphaText(state.alpha) + ".</p>");
+      }
+
+      function renderEffect(r) {
+        var sc = state.sc;
+        var atStart = test(sc.mu0, state.mean, sc.s0, sc.n0, state.alpha);
+        effectLine.innerHTML = "Observed difference: <strong>" + signed(r.diff) + "</strong> \u2014 this " +
+          "is fixed by the sample mean you set, and neither slider here touches it. " +
+          "At n = " + sc.n0 + " and s = " + u(sc.s0) + " the standard error was " + u(atStart.se, 3) +
+          "; now it is <strong>" + u(r.se, 3) + "</strong>. The effect stayed the same; the uncertainty " +
+          "around it changed.";
+      }
+
+      function renderCaution() {
+        var show = state.n < 30;
+        caution.hidden = !show;
+        caution.innerHTML = show
+          ? "<strong>At this sample size:</strong> the one-sample t procedure works best when the " +
+            "population is reasonably symmetric and has no severe outliers."
+          : "";
+      }
+
+      function renderAlphaLine(r) {
+        if (r.degenerate) { alphaLine.textContent = ""; return; }
+        var parts = ALPHAS.map(function (a) {
+          return "\u03B1 = " + alphaText(a) + ": " + (r.p < a ? "reject" : "do not reject");
+        });
+        alphaLine.innerHTML = "With " + fmtP(r.p) + " fixed \u2014 " + parts.join(" \u00B7 ") +
+          ". Changing \u03B1 changes the decision rule, not the evidence: the p-value above does not " +
+          "move when you switch levels.";
+      }
+
+      function renderCases() {
+        var sc = state.sc;
+        var A = test(sc.mu0, sc.mu0 + sc.caseA.diff, sc.s0, sc.caseA.n, 0.05);
+        var B = test(sc.mu0, sc.mu0 + sc.caseB.diff, sc.s0, sc.caseB.n, 0.05);
+        cases.innerHTML =
+          "<h3>Two results worth comparing</h3>" +
+          "<table class='readout'><tr><th scope='col'>Case</th><th scope='col'>n</th>" +
+          "<th scope='col'>Difference</th><th scope='col'>p</th><th scope='col'>At \u03B1 = .05</th></tr>" +
+          "<tr><th scope='row'>A</th><td class='num'>" + sc.caseA.n + "</td><td class='num'>" +
+          signed(sc.caseA.diff) + "</td><td class='num'>" + fmtP(A.p).replace("p = ", "") +
+          "</td><td>" + (A.reject ? "significant" : "not significant") + "</td></tr>" +
+          "<tr><th scope='row'>B</th><td class='num'>" + sc.caseB.n + "</td><td class='num'>" +
+          signed(sc.caseB.diff) + "</td><td class='num'>" + fmtP(B.p).replace("p = ", "") +
+          "</td><td>" + (B.reject ? "significant" : "not significant") + "</td></tr></table>" +
+          "<p>The larger difference is the one that is <em>not</em> significant \u2014 " + sc.caseNote +
+          ". With a large enough sample, a very small difference becomes statistically detectable. " +
+          "Statistical significance addresses evidence relative to sampling uncertainty; practical " +
+          "importance requires considering the magnitude and the business context, which no p-value " +
+          "reports.</p>";
+      }
+
+      function renderMeaning(r) {
+        var sc = state.sc;
+        meaning.innerHTML =
+          "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What the p-value means</strong>Assuming H\u2080 is true, the p-value is the " +
+          "probability of getting a test statistic at least as extreme as the one observed. Smaller " +
+          "means the observed result is less compatible with the null model.</div>" +
+          "<div><strong>What it does not mean</strong>Not the probability that H\u2080 is true, and not " +
+          "the probability the result would replicate. A large p-value is not proof that the benchmark " +
+          "holds \u2014 it means this sample did not provide strong evidence against it.</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>" +
+          (r.degenerate ? "Nothing from this test \u2014 there is no variability to test against."
+            : (r.reject
+              ? "\u201CThe data provide evidence that the " + sc.param + " differs from " + u(sc.mu0) +
+                ". The observed difference is " + signed(r.diff) + " \u2014 whether that is worth acting " +
+                "on is a business judgement, not a statistical one.\u201D"
+              : "\u201CThis sample does not provide strong enough evidence that the " + sc.param +
+                " differs from " + u(sc.mu0) + " at this significance level. A real difference may exist " +
+                "that this sample is too small or too noisy to detect.\u201D")) +
+          "</div></div>";
+      }
+
+      /* -------------------------------------------------------------- plots - */
+
+      /* Estimate against benchmark, on a scale fixed for the whole scenario.
+         The bar is the matching (1 - alpha) interval, which is why the verdict
+         and the picture always agree: the Week 12 deck notes that a two-tailed
+         test rejects exactly when the benchmark falls outside that interval. */
+      function renderScale(r) {
+        var W = 640, L = 20, R = 20, T = 26, B = 30, Ht = 110;
+        var pw = W - L - R;
+        var lo = state.axis[0], hi = state.axis[1];
+        var X = function (v) { return L + ((v - lo) / (hi - lo)) * pw; };
+        while (scaleSvg.firstChild) scaleSvg.removeChild(scaleSvg.firstChild);
+        var y = T + 22;
+
+        var axisY = Ht - B + 6;
+        line(scaleSvg, L, axisY, L + pw, axisY, "#131313", 1);
+        [0, 0.5, 1].forEach(function (f) {
+          var v = lo + f * (hi - lo);
+          line(scaleSvg, X(v), axisY, X(v), axisY + 4, "#131313", 1);
+          txt(scaleSvg, X(v), axisY + 17, u(v, 1), "11", "#6B6B6B", "middle");
+        });
+
+        // benchmark
+        line(scaleSvg, X(r.mu0), T - 8, X(r.mu0), axisY, "#131313", 1.5, "4,3");
+        txt(scaleSvg, X(r.mu0), T - 12, "\u03BC\u2080 = " + u(r.mu0), "11", "#131313", "middle");
+
+        if (!r.degenerate) {
+          var crit = tCrit(1 - state.alpha, r.df);
+          var lower = r.mean - crit * r.se, upper = r.mean + crit * r.se;
+          line(scaleSvg, X(lower), y, X(upper), y, "#131313", 2);
+          [lower, upper].forEach(function (v) { line(scaleSvg, X(v), y - 8, X(v), y + 8, "#131313", 2); });
+        }
+        scaleSvg.appendChild(svgEl("circle", { cx: X(r.mean), cy: y, r: 6,
+          fill: "#CFB991", stroke: "#131313", "stroke-width": 2 }));
+        txt(scaleSvg, X(r.mean), y + 24, "x\u0304 = " + u(r.mean), "11", "#131313", "middle");
+
+        scaleCap.textContent = r.degenerate
+          ? "Sample mean against the benchmark. With s = 0 there is no interval to draw."
+          : "Sample mean (filled circle) with its " + Math.round((1 - state.alpha) * 100) +
+            "% interval, against the benchmark (dashed). The scale is fixed for this scenario. " +
+            "The benchmark falls " + (r.reject ? "outside" : "inside") + " the interval, which is the " +
+            "same verdict the p-value gives.";
+        scaleSvg.setAttribute("aria-label", "Sample mean " + u(r.mean) + " against benchmark " +
+          u(r.mu0) + ". Observed difference " + signed(r.diff) + ".");
+      }
+
+      /* The t distribution under H0, with the two tails beyond the observed
+         statistic marked. This picture IS the p-value. */
+      function renderTails(r) {
+        var W = 640, L = 30, R = 30, T = 14, B = 30, Ht = 170;
+        var pw = W - L - R, ph = Ht - T - B;
+        while (tailSvg.firstChild) tailSvg.removeChild(tailSvg.firstChild);
+        if (r.degenerate) {
+          txt(tailSvg, W / 2, Ht / 2, "No test statistic to place.", "12", "#6B6B6B", "middle");
+          tailCap.textContent = "";
+          tailSvg.setAttribute("aria-label", "No test statistic to display.");
+          return;
+        }
+        var df = r.df;
+        var span = 4.2;
+        var tShown = Math.max(-span, Math.min(span, r.t));
+        var clipped = Math.abs(r.t) > span;
+        var X = function (t) { return L + ((t + span) / (2 * span)) * pw; };
+        var peak = tDensity(0, df);
+        var Y = function (d) { return T + ph - (d / peak) * (ph - 10); };
+
+        // shaded tails, drawn as filled polygons from the curve
+        [-1, 1].forEach(function (sign) {
+          var pts = [], t0 = sign < 0 ? -span : Math.abs(tShown), t1 = sign < 0 ? -Math.abs(tShown) : span;
+          var step = (t1 - t0) / 40, i, tv;
+          for (i = 0; i <= 40; i++) { tv = t0 + i * step; pts.push(X(tv) + "," + Y(tDensity(tv, df))); }
+          pts.push(X(t1) + "," + Y(0), X(t0) + "," + Y(0));
+          tailSvg.appendChild(svgEl("polygon", { points: pts.join(" "), fill: "#CFB991",
+            stroke: "#8E7B4F", "stroke-width": 1 }));
+        });
+
+        // the curve
+        var d = [], i2, tv2;
+        for (i2 = 0; i2 <= 160; i2++) {
+          tv2 = -span + (2 * span) * (i2 / 160);
+          d.push((i2 ? "L" : "M") + X(tv2) + " " + Y(tDensity(tv2, df)));
+        }
+        tailSvg.appendChild(svgEl("path", { d: d.join(" "), fill: "none", stroke: "#131313", "stroke-width": 1.5 }));
+        line(tailSvg, L, Y(0), L + pw, Y(0), "#131313", 1);
+
+        // centre, then the observed statistic. When |t| rounds to zero the two
+        // markers coincide, so draw one central marker instead of two labels
+        // stacked on top of each other.
+        var atCentre = Math.abs(r.t) < 0.0005;
+        line(tailSvg, X(0), Y(0), X(0), T + 4, "#131313", 1, "3,3");
+        if (!atCentre) txt(tailSvg, X(0), T + 2, "0", "11", "#6B6B6B", "middle");
+        if (atCentre) {
+          line(tailSvg, X(0), Y(0) + 6, X(0), Y(tDensity(0, df)) - 4, "#131313", 2);
+          txt(tailSvg, X(0), Y(0) + 20, "t = 0.000", "11", "#131313", "middle");
+        } else {
+          [-Math.abs(tShown), Math.abs(tShown)].forEach(function (tv) {
+            line(tailSvg, X(tv), Y(0) + 6, X(tv), Y(tDensity(tv, df)) - 4, "#131313", 2);
+          });
+          txt(tailSvg, X(Math.abs(tShown)), Y(0) + 20,
+            (clipped ? "|t| \u2265 " : "|t| = ") + Math.abs(r.t).toFixed(3), "11", "#131313", "middle");
+          txt(tailSvg, X(-Math.abs(tShown)), Y(0) + 20,
+            "\u2212" + Math.abs(r.t).toFixed(3), "11", "#131313", "middle");
+        }
+
+        tailCap.textContent = "If H\u2080 were true, the statistic would follow this t distribution with " +
+          df + " degrees of freedom. " + (atCentre
+            ? "The observed statistic sits exactly at the centre, so every value is at least as extreme " +
+              "as it: the whole area is the p-value, 1.000."
+            : "The two shaded tails beyond \u00B1" + Math.abs(r.t).toFixed(3) + " are the p-value: " +
+              fmtP(r.p).replace("p = ", "").replace("p ", "") + ".") +
+          (clipped ? " The observed statistic is past the edge of the drawn range." : "");
+        tailSvg.setAttribute("aria-label", "The t distribution with " + df + " degrees of freedom under " +
+          "the null hypothesis. " + (atCentre
+            ? "The observed statistic is 0.000, at the centre, so the entire area is shaded and the " +
+              "p-value is 1.000."
+            : "The two tails beyond plus and minus " + Math.abs(r.t).toFixed(3) + " are shaded. Those " +
+              "tails are the p-value, " + fmtP(r.p).replace("p = ", "").replace("p ", "") + "."));
+      }
+
+      function line(svg, x1, y1, x2, y2, stroke, w, dash) {
+        var a = { x1: x1, y1: y1, x2: x2, y2: y2, stroke: stroke, "stroke-width": w };
+        if (dash) a["stroke-dasharray"] = dash;
+        svg.appendChild(svgEl("line", a));
+      }
+      function txt(svg, x, y, s, size, fill, anchor) {
+        var n = svgEl("text", { x: x, y: y, "font-size": size, fill: fill, "text-anchor": anchor,
+          "font-family": "Segoe UI, Arial, sans-serif" });
+        n.textContent = s;
+        svg.appendChild(n);
+      }
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>

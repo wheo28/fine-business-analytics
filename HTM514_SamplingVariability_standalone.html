@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — One sample is not the answer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: sampling variability, the standard error, and the central limit theorem in a hospitality setting.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 1
+   "One sample is not the answer: sampling variability and the standard error"
+
+   Fits beside Week 12 (Sampling, sampling distributions, the central limit
+   theorem, and the move from z to t).
+
+   Everything here is generated locally with a seeded RNG. No network, no
+   storage, no student data.
+   ========================================================================== */
+
+(function () {
+  "use strict";
+
+  var H = window.HTM514;
+  var h = H.h;
+
+  var N_POP = 4000;                          // size of the simulated population
+  var N_CHOICES = [5, 10, 20, 30, 40, 60, 100];
+
+  /* ---------------------------------------------------------------- data --- */
+
+  var SCENARIOS = [
+    {
+      id: "adr",
+      label: "Hotel — rate paid per booking",
+      noun: "booking",
+      nounPl: "bookings",
+      quantity: "the rate paid",
+      unit: { prefix: "$", suffix: "" },
+      decimals: 2,
+      valueDecimals: 0,
+      narrative:
+        "A 240-room property took thousands of bookings last quarter at many different rates: " +
+        "discounted advance rates, negotiated corporate rates, walk-up rates on sold-out nights. " +
+        "The revenue manager wants <strong>the average rate paid per booking</strong>, but pulling every " +
+        "record is slow, so an analyst pulls a random sample of bookings instead.",
+      gen: function (r) { return Math.round(89 + Math.exp(H.draw.normal(r, 3.5, 0.6))); }
+    },
+    {
+      id: "turn",
+      label: "Restaurant — table turn time",
+      noun: "table",
+      nounPl: "tables",
+      quantity: "the turn time in minutes",
+      unit: { prefix: "", suffix: " min" },
+      decimals: 2,
+      valueDecimals: 0,
+      narrative:
+        "A 90-seat casual restaurant wants <strong>the average table turn time</strong> so it can set " +
+        "realistic quoted wait times on Friday nights. Timing every table for a month is not practical, " +
+        "so a manager times a random sample of tables.",
+      gen: function (r) { return Math.round(22 + H.draw.gamma(r, 3, 8)); }
+    },
+    {
+      id: "sat",
+      label: "Resort — guest satisfaction score",
+      noun: "guest",
+      nounPl: "guests",
+      quantity: "the satisfaction score (0–10)",
+      unit: { prefix: "", suffix: " pts" },
+      decimals: 2,
+      valueDecimals: 1,
+      narrative:
+        "A resort collects a 0–10 satisfaction score at checkout. Most guests rate their stay highly and " +
+        "a few rate it very poorly. Corporate asks for <strong>the average score for the property</strong>, " +
+        "and the property reports it from a random sample of guests.",
+      gen: function (r) {
+        var v = 10 - H.draw.gamma(r, 2, 0.9);
+        if (v < 0) v = 0;
+        return Math.round(v * 10) / 10;
+      }
+    },
+    {
+      id: "walkin",
+      label: "Airport hotel — daily walk-in bookings",
+      noun: "day",
+      nounPl: "days",
+      quantity: "the number of walk-in bookings",
+      unit: { prefix: "", suffix: "" },
+      decimals: 2,
+      valueDecimals: 0,
+      narrative:
+        "An airport hotel holds back rooms for walk-ins. Some days bring none, some days bring a dozen. " +
+        "Front office wants <strong>the average number of walk-in bookings per day</strong> to decide how " +
+        "many rooms to hold, and estimates it from a random sample of days.",
+      gen: function (r) { return H.draw.poisson(r, 5.5); }
+    }
+  ];
+
+  /* --------------------------------------------------------- question text -- */
+
+  function predictionFor(s) {
+    return {
+      stem:
+        "You are about to take <strong>many separate random samples of 10 " + s.nounPl + "</strong> and " +
+        "compute the mean of each one. Before you run anything: how will the spread of those " +
+        "<em>sample means</em> compare with the spread of " + s.quantity + " across individual " +
+        s.nounPl + "?",
+      options: [
+        {
+          text: "About the same spread — a sample is just a smaller copy of the population.",
+          correct: false,
+          why: "Individual " + s.nounPl + " vary a lot, but averaging 10 of them cancels much of that " +
+               "variation: a high value is usually offset by a low one. Run the simulation and watch the " +
+               "two histograms — the means pile up in a much narrower band."
+        },
+        {
+          text: "Clearly narrower — sample means cluster more tightly than individual values.",
+          correct: true,
+          why: "That is the idea behind the standard error. Averaging cancels part of the individual " +
+               "variation, so sample means vary less from one sample to the next than individual " +
+               s.nounPl + " vary from one another. Now run it and see <em>how much</em> narrower."
+        },
+        {
+          text: "Wider — small samples are unreliable, so their means should be all over the place.",
+          correct: false,
+          why: "Small samples are less reliable than large ones, but the mean of 10 values is still " +
+               "steadier than a single value. The spread of sample means is σ/√n, which is always " +
+               "smaller than σ. Run it and compare the two histograms."
+        }
+      ]
+    };
+  }
+
+  function quickCheckFor(s) {
+    return [
+      {
+        stem: "You increase the sample from 10 " + s.nounPl + " to 40 " + s.nounPl +
+              ". What happens to the standard error of the sample mean?",
+        options: [
+          { text: "It stays about the same.", correct: false,
+            why: "The standard error is σ/√n, so it does depend on n. Going from 10 to 40 divides it by √4 = 2." },
+          { text: "It is cut roughly in half.", correct: true,
+            why: "σ/√n: quadrupling n divides the standard error by √4 = 2. Four times the data buys you " +
+                 "twice the precision — which is why precision gets expensive." },
+          { text: "It is cut to roughly one quarter.", correct: false,
+            why: "That would be true if the standard error were σ/n. It is σ/√n, so quadrupling n halves it." }
+        ]
+      },
+      {
+        stem: "Taking a larger sample also makes individual " + s.nounPl + " less variable. True?",
+        options: [
+          { text: "True — more data smooths out the variation.", correct: false,
+            why: "Sampling more does not change the " + s.nounPl + " themselves. σ is a fact about the " +
+                 "population; what shrinks is how much the <em>sample mean</em> varies from one sample to " +
+                 "the next." },
+          { text: "False — only the spread of the sample mean shrinks.", correct: true,
+            why: "Right. σ describes the " + s.nounPl + "; σ/√n describes how much sample means vary across " +
+                 "repeated samples of that size. Bigger samples improve the estimate, not the underlying variation." }
+        ]
+      },
+      {
+        stem: "A colleague reports: \"Our sample of 30 " + s.nounPl + " gives a standard error of S, so " +
+              "about two thirds of individual " + s.nounPl + " fall within S of the mean.\" What is wrong?",
+        options: [
+          { text: "Nothing — that is what a standard error describes.", correct: false,
+            why: "The standard error is the standard deviation of the <em>sampling distribution of the mean</em>, " +
+                 "not of the individual values. For individuals you would use σ, roughly √30 ≈ 5.5 times larger here." },
+          { text: "The standard error describes how much sample means vary across repeated samples, not how " +
+                  "spread out individual " + s.nounPl + " are.", correct: true,
+            why: "Exactly. σ describes the " + s.nounPl + "; σ/√n describes the variability of the estimate. " +
+                 "Confusing the two makes the business look far more predictable than it is — a costly mistake " +
+                 "when you are staffing or pricing for individual cases rather than for the average." }
+        ]
+      },
+      {
+        stem: "You take a random sample of 10 " + s.nounPl + " and compute the mean. A colleague takes a " +
+              "different random sample of 10 " + s.nounPl + ". What should you expect?",
+        options: [
+          { text: "The same mean, since both samples come from the same population.", correct: false,
+            why: "Both are estimating the same population mean, but each sample contains different " + s.nounPl +
+                 ", so the two means will generally differ. Each one is a single realization from the " +
+                 "distribution of sample means you just built." },
+          { text: "Different means — each is one realization from the same sampling distribution.", correct: true,
+            why: "Right. Neither mean is \"the answer\": both are draws from the same sampling distribution, " +
+                 "and how widely that distribution spreads is what the standard error measures." },
+          { text: "Different means, which would show that one of the samples was drawn incorrectly.", correct: false,
+            why: "Different results are the ordinary consequence of random sampling, not evidence of a mistake. " +
+                 "That variation is exactly what the right-hand histogram displays." }
+        ]
+      },
+      {
+        stem: "The " + s.nounPl + " in this scenario are clearly not normally distributed. Can you still " +
+              "use a normal-based interval for the mean?",
+        options: [
+          { text: "No — normal-based methods require a normal population, full stop.", correct: false,
+            why: "The central limit theorem applies to the distribution of the <em>mean</em>, not to the raw " +
+                 "data. With a large enough n the sampling distribution of the mean is close to normal even " +
+                 "when the population is skewed." },
+          { text: "Usually yes, if n is large enough — the CLT applies to the mean, not to the raw data.", correct: true,
+            why: "Right, with the usual caution from lecture: fairly symmetric data may be fine at n ≈ 10, " +
+                 "but strongly skewed data needs roughly n ≥ 30. Set n = 5 in the simulator and watch the " +
+                 "histogram of means stay visibly skewed." },
+          { text: "Only after you delete the extreme values so the data look normal.", correct: false,
+            why: "Deleting inconvenient cases changes the population you are describing. Extreme values in " +
+                 "this scenario are real business outcomes, not errors." }
+        ]
+      }
+    ];
+  }
+
+  function meaningFor(s) {
+    return {
+      is: "The standard error, σ/√n, is the <strong>standard deviation of the sampling distribution of the " +
+          "sample mean</strong>: it describes how much estimates like yours vary across repeated random " +
+          "samples of the same size.",
+      isNot: "It is <strong>not</strong> the spread of individual " + s.nounPl + ". And a small standard " +
+             "error does not fix a bad sampling process — a biased sample can be very precise and still wrong.",
+      manager: "A manager can reasonably say: \"Our estimate of the average is X. The standard error tells us " +
+               "how much estimates like this would typically vary across repeated random samples of this " +
+               "size.\" A manager cannot say \"the average is exactly X\", and cannot plan individual " +
+               s.nounPl + " around X."
+    };
+  }
+
+  /* ------------------------------------------------------------- the module - */
+
+  var module = {
+    title: "One sample is not the answer",
+    subtitle: "Sampling variability, the standard error, and why n matters more slowly than you would like.",
+    courseFit:
+      "Optional practice for Week 12 (sampling, sampling distributions, the central limit theorem). " +
+      "About 10 minutes. Nothing is submitted or recorded.",
+    footer:
+      "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+      "All data on this page are simulated in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      /* ---- state ---- */
+      var state = {
+        scenario: SCENARIOS[0],
+        seed: 20240514,
+        pop: [], mu: 0, sigma: 0, lo: 0, hi: 0,
+        n: 10,
+        means: [],
+        lastSample: [],
+        zoom: false,
+        predicted: null,
+        runLog: []
+      };
+
+      /* ---- step 1: scenario ---- */
+      var s1 = steps.add({ id: "scenario", title: "The scenario" });
+      var narrative = h("p", { class: "scenario-text" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a scenario",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) {
+        picker.appendChild(h("option", { value: sc.id, text: sc.label }));
+      });
+      s1.body.appendChild(narrative);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Scenario" }), picker]),
+        h("button", {
+          class: "quiet", type: "button", text: "New data, same scenario",
+          onclick: function () { state.seed = (state.seed * 31 + 7) % 2147483647; buildPopulation(); resetRun(true); }
+        })
+      ]));
+      var popFacts = h("p", { class: "hint" });
+      s1.body.appendChild(popFacts);
+
+      /* ---- step 2: predict ---- */
+      var s2 = steps.add({
+        id: "predict", title: "Before you change anything — predict",
+        hint: "Commit to an answer. The simulation is more useful when you have something to be wrong about."
+      });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* ---- step 3: try it ---- */
+      var s3 = steps.add({
+        id: "try", title: "Try it", locked: true,
+        hint: "Each draw takes a fresh random sample of n " + "cases" + ", computes its mean, and adds that one mean to the right-hand histogram."
+      });
+
+      var nRange = h("input", {
+        type: "range", id: "n-range", min: "0", max: String(N_CHOICES.length - 1), step: "1", value: "1",
+        "aria-label": "Sample size n",
+        oninput: function () { setN(N_CHOICES[Number(this.value)]); }
+      });
+      var nLabel = h("span", { class: "checkline", id: "n-label" });
+
+      var btn1 = h("button", { type: "button", text: "Draw 1 sample", onclick: function () { runSamples(1); } });
+      var btn25 = h("button", { class: "primary", type: "button", text: "Draw 25 samples", onclick: function () { runSamples(25); } });
+      var btn500 = h("button", { type: "button", text: "Draw 500 samples", onclick: function () { runSamples(500); } });
+      var btnClear = h("button", { class: "quiet", type: "button", text: "Clear collected means", onclick: function () { resetRun(false); } });
+      var zoomBox = h("input", {
+        type: "checkbox", id: "zoom", onchange: function () { state.zoom = this.checked; renderCharts(); }
+      });
+
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "n-range", text: "Sample size (n)" }), nRange, nLabel]),
+        btn1, btn25, btn500, btnClear
+      ]));
+      s3.body.appendChild(h("label", { class: "checkline", for: "zoom" }, [
+        zoomBox, h("span", { text: "Zoom the right-hand chart in on the sample means" })
+      ]));
+
+      var canvasPop = h("canvas", { role: "img" });
+      var canvasMeans = h("canvas", { role: "img" });
+      var capPop = h("p", { class: "cap" });
+      var capMeans = h("p", { class: "cap" });
+      s3.body.appendChild(h("div", { class: "charts" }, [
+        h("div", { class: "chart-box" }, [
+          h("h3", { text: "Individual cases (the whole population)" }), capPop, canvasPop
+        ]),
+        h("div", { class: "chart-box" }, [
+          h("h3", { text: "Sample means you have collected" }), capMeans, canvasMeans
+        ])
+      ]));
+
+      var readout = h("table", { class: "readout" });
+      var lastSampleLine = h("p", { class: "hint" });
+      s3.body.appendChild(readout);
+      s3.body.appendChild(lastSampleLine);
+      var runLogBox = h("div");
+      s3.body.appendChild(runLogBox);
+
+      var histPop = new H.Histogram(canvasPop, { height: 190, bins: 46, fill: "#E4E4E4" });
+      var histMeans = new H.Histogram(canvasMeans, { height: 190, bins: 46, fill: "#CFB991" });
+
+      /* ---- step 4: what changed ---- */
+      var s4 = steps.add({ id: "changed", title: "What changed?", locked: true });
+      var changedBox = h("div", { class: "panel" });
+      s4.body.appendChild(changedBox);
+
+      /* ---- step 5: why ---- */
+      var s5 = steps.add({ id: "why", title: "Why?", locked: true });
+      var whyBox = h("div");
+      s5.body.appendChild(whyBox);
+
+      /* ---- step 6: quick check ---- */
+      var s6 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s6.body.appendChild(checkSlot);
+
+      /* ---- step 7: reset ---- */
+      var s7 = steps.add({ id: "again", title: "Try another example", locked: true });
+      s7.body.appendChild(h("p", {
+        class: "hint",
+        text: "A different scenario changes the shape of the population — the skew, the ceiling, the discreteness — while the relationship between n and the standard error stays the same."
+      }));
+      s7.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Next scenario",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.scenario);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-scenario").scrollIntoView({ block: "start" });
+          }
+        }),
+        h("button", {
+          class: "quiet", type: "button", text: "Start this scenario over",
+          onclick: function () { setScenario(state.scenario.id); }
+        })
+      ]));
+
+      /* ------------------------------------------------------- behaviour --- */
+
+      function buildPopulation() {
+        var r = H.rng(state.seed);
+        var s = state.scenario;
+        var v = new Array(N_POP), i;
+        for (i = 0; i < N_POP; i++) v[i] = s.gen(r);
+        state.pop = v;
+        state.mu = H.stats.mean(v);
+        state.sigma = H.stats.sdPop(v);
+        var rawLo = state.mu - 3.6 * state.sigma, rawHi = state.mu + 3.6 * state.sigma;
+        var pad = 0.02 * (rawHi - rawLo);
+        state.lo = Math.max(rawLo, H.stats.min(v) - pad);
+        state.hi = Math.min(rawHi, H.stats.max(v) + pad);
+        popFacts.innerHTML =
+          "Simulated population: " + N_POP.toLocaleString() + " " + s.nounPl + ". " +
+          "True mean μ = <strong>" + u(state.mu) + "</strong>, population standard deviation σ = <strong>" +
+          u(state.sigma) + "</strong>. In practice you would not know either number — that is the point of sampling.";
+      }
+
+      function u(x, d) {
+        var s = state.scenario;
+        return H.fmt.withUnit(x, s.unit, d === undefined ? s.decimals : d);
+      }
+
+      function setScenario(id) {
+        state.scenario = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        narrative.innerHTML = state.scenario.narrative;
+        s3.body.querySelector(".hint").textContent =
+          "Each draw takes a fresh random sample of n " + state.scenario.nounPl +
+          ", computes its mean, and adds that one mean to the right-hand histogram.";
+        buildPopulation();
+        renderPrediction();
+        renderQuickCheck();
+        state.predicted = null;
+        state.means = [];
+        state.lastSample = [];
+        state.runLog = [];
+        setN(10, true);
+        s3.section.setAttribute("data-locked", "true");
+        s4.section.setAttribute("data-locked", "true");
+        s5.section.setAttribute("data-locked", "true");
+        s6.section.setAttribute("data-locked", "true");
+        s7.section.setAttribute("data-locked", "true");
+      }
+
+      function renderPrediction() {
+        predictSlot.innerHTML = "";
+        var q = predictionFor(state.scenario);
+        var c = new H.Choices(q, function (i, opt) {
+          state.predicted = { index: i, correct: !!opt.correct, text: opt.text };
+          steps.unlock("try");
+          H.announce("The simulation is now available below.");
+        });
+        predictSlot.appendChild(c.el);
+      }
+
+      function renderQuickCheck() {
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheckFor(state.scenario), state.seed).el);
+      }
+
+      function setN(n, silent) {
+        if (state.means.length >= 5) logRun();
+        state.n = n;
+        nRange.value = String(N_CHOICES.indexOf(n));
+        state.means = [];
+        state.lastSample = [];
+        renderAll();
+        if (!silent) H.announce("Sample size set to " + n + ". Collected means cleared.");
+      }
+
+      function logRun() {
+        state.runLog.push({
+          n: state.n,
+          k: state.means.length,
+          observed: H.stats.sdSample(state.means),
+          theory: state.sigma / Math.sqrt(state.n)
+        });
+        if (state.runLog.length > 6) state.runLog.shift();
+      }
+
+      function resetRun(rebuiltPopulation) {
+        state.means = [];
+        state.lastSample = [];
+        if (rebuiltPopulation) state.runLog = [];
+        renderAll();
+      }
+
+      function runSamples(k) {
+        var r = H.rng((state.seed + state.means.length * 7919 + k * 104729) >>> 0);
+        var i, j, sample, idx;
+        for (i = 0; i < k; i++) {
+          sample = new Array(state.n);
+          for (j = 0; j < state.n; j++) {
+            idx = Math.floor(r() * N_POP);
+            sample[j] = state.pop[idx];
+          }
+          state.means.push(H.stats.mean(sample));
+        }
+        state.lastSample = sample;
+        if (state.means.length >= 25) {
+          steps.unlock("changed"); steps.unlock("why"); steps.unlock("check"); steps.unlock("again");
+        }
+        renderAll();
+        H.announce(k + (k === 1 ? " sample drawn." : " samples drawn.") + " " +
+          state.means.length + " sample means collected. Observed spread of the means: " +
+          u(H.stats.sdSample(state.means)) + ".");
+      }
+
+      function renderAll() { renderCharts(); renderReadout(); renderChanged(); renderWhy(); }
+
+      function renderCharts() {
+        var s = state.scenario;
+        histPop.opts.lo = state.lo; histPop.opts.hi = state.hi;
+        histPop.opts.axisLabel = s.quantity + " for one " + s.noun;
+        histPop.set(state.pop, [{ value: state.mu, label: "μ = " + u(state.mu, 1) }]);
+        canvasPop.setAttribute("aria-label",
+          "Histogram of " + s.quantity + " for all " + N_POP + " " + s.nounPl +
+          ". Centred on " + u(state.mu) + " with a standard deviation of " + u(state.sigma) + ".");
+        capPop.textContent = "All " + N_POP.toLocaleString() + " " + s.nounPl + ", one bar per value range.";
+
+        var lo = state.lo, hi = state.hi;
+        if (state.zoom && state.means.length > 1) {
+          var se = state.sigma / Math.sqrt(state.n);
+          lo = state.mu - 4.5 * se; hi = state.mu + 4.5 * se;
+        }
+        histMeans.opts.lo = lo; histMeans.opts.hi = hi;
+        histMeans.opts.axisLabel = "mean of " + state.n + " " + s.nounPl;
+        histMeans.set(state.means, [{ value: state.mu, label: "μ = " + u(state.mu, 1) }]);
+        canvasMeans.setAttribute("aria-label", state.means.length
+          ? "Histogram of " + state.means.length + " sample means, each from a sample of " + state.n +
+            " " + s.nounPl + ". Centred on " + u(H.stats.mean(state.means)) + " with an observed spread of " +
+            u(H.stats.sdSample(state.means)) + ", against a theoretical standard error of " +
+            u(state.sigma / Math.sqrt(state.n)) + "."
+          : "Empty histogram. No sample means collected yet.");
+        capMeans.textContent = state.means.length
+          ? state.means.length.toLocaleString() + " sample means, each from n = " + state.n +
+            (state.zoom ? " (zoomed in)" : " (same horizontal scale as the left chart)")
+          : "Nothing collected yet — draw a sample.";
+      }
+
+      function renderReadout() {
+        var obs = H.stats.sdSample(state.means);
+        var theory = state.sigma / Math.sqrt(state.n);
+        nLabel.textContent = "n = " + state.n;
+        readout.innerHTML =
+          "<caption>Current numbers</caption>" +
+          row("True population mean (μ)", u(state.mu)) +
+          row("Population standard deviation (σ)", u(state.sigma)) +
+          row("Sample size (n)", String(state.n)) +
+          row("Sample means collected", state.means.length.toLocaleString()) +
+          row("Average of your sample means", state.means.length ? u(H.stats.mean(state.means)) : "—") +
+          row("Spread of your sample means (observed)", state.means.length > 1 ? u(obs) : "—") +
+          row("Standard error, σ/√n (theory)", u(theory));
+
+        if (state.lastSample.length) {
+          var shown = state.lastSample.slice(0, 12).map(function (v) {
+            return H.fmt.withUnit(v, state.scenario.unit, state.scenario.valueDecimals);
+          }).join(", ");
+          lastSampleLine.innerHTML = "Most recent sample: " + shown +
+            (state.lastSample.length > 12 ? ", … (" + state.lastSample.length + " values)" : "") +
+            " → mean = <strong>" + u(H.stats.mean(state.lastSample)) + "</strong>";
+        } else {
+          lastSampleLine.textContent = "";
+        }
+
+        if (state.runLog.length) {
+          var rows = state.runLog.map(function (r) {
+            return "<tr><td>" + r.n + "</td><td class='num'>" + r.k + "</td><td class='num'>" +
+              u(r.observed) + "</td><td class='num'>" + u(r.theory) + "</td></tr>";
+          }).join("");
+          runLogBox.innerHTML =
+            "<table class='readout runlog'><caption>Earlier runs in this scenario</caption>" +
+            "<tr><th>n</th><th>samples</th><th>observed spread of means</th><th>σ/√n</th></tr>" +
+            rows + "</table>";
+        } else {
+          runLogBox.innerHTML = "";
+        }
+      }
+
+      function row(label, value) {
+        return "<tr><th scope='row'>" + label + "</th><td class='num'>" + value + "</td></tr>";
+      }
+
+      function renderChanged() {
+        if (state.means.length < 25) { changedBox.innerHTML = ""; return; }
+        var obs = H.stats.sdSample(state.means);
+        var theory = state.sigma / Math.sqrt(state.n);
+        var ratio = state.sigma / obs;
+        var pred = state.predicted;
+        var predLine = pred
+          ? "<p>You predicted: <em>" + pred.text + "</em> " +
+            (pred.correct ? "That is what the two histograms show." :
+              "Compare the two histograms now — the means are clearly the narrower of the two.") + "</p>"
+          : "";
+        changedBox.innerHTML = predLine +
+          "<p>Individual " + state.scenario.nounPl + " are spread out by σ = <strong>" + u(state.sigma) +
+          "</strong>. The " + state.means.length.toLocaleString() + " sample means you collected are spread out by only <strong>" +
+          u(obs) + "</strong> — about <strong>" + H.fmt.n(ratio, 1) + " times tighter</strong> — and they centre on the " +
+          "true mean rather than drifting away from it.</p>" +
+          "<p>The theoretical standard error is σ/√n = " + u(state.sigma) + " ÷ √" + state.n + " = <strong>" +
+          u(theory) + "</strong>. Your simulated value came out at " + u(obs) + ". The two agree closely, and " +
+          "they agree more closely the more samples you collect.</p>" +
+          "<p>Now change n and watch what it costs: going from n = 10 to n = 40 does not quarter the spread of " +
+          "the means, it halves it.</p>";
+      }
+
+      function renderWhy() {
+        if (state.means.length < 25) { whyBox.innerHTML = ""; return; }
+        var m = meaningFor(state.scenario);
+        whyBox.innerHTML =
+          "<p>A sample mean is an average, and averaging cancels. One unusually high " + state.scenario.noun +
+          " is usually offset by a low one, so the average of n values swings less than a single value does. " +
+          "The right-hand histogram <em>is</em> the sampling distribution of the mean, and its standard " +
+          "deviation is the <strong>standard error</strong>: σ/√n. The √ is the expensive part — precision " +
+          "improves with the square root of your effort, not with your effort.</p>" +
+          "<p>Notice the shape as well as the spread. The population on the left is not symmetric, but as n grows " +
+          "the histogram of means becomes close to bell-shaped and centred on μ. That is the central limit theorem, " +
+          "and it is what licenses the z- and t-procedures you will use for intervals and hypothesis tests. Set " +
+          "n = 5 and it is visibly imperfect; set n = 30 or more and it is hard to tell from a normal curve.</p>" +
+          "<div class='panel'><h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What it means</strong>" + m.is + "</div>" +
+          "<div><strong>What it does not mean</strong>" + m.isNot + "</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>" + m.manager + "</div>" +
+          "</div></div>";
+      }
+
+      /* ---- go ---- */
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+      window.addEventListener("resize", renderCharts);
+    }
+  };
+
+  H.mount(module);
+
+  // Exposed so the harnesses in /tests can exercise the real scenario
+  // generators instead of a copy of them. Nothing on the page reads this.
+  window.HTM514_SAMPLING = { scenarios: SCENARIOS, popSize: N_POP, sampleSizes: N_CHOICES };
+})();
+
+</script>
+</body>
+</html>

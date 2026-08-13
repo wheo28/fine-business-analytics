@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTM 514 Interactive — Correlation Explorer</title>
+<meta name="description" content="Optional HTM 514 practice interactive: what a correlation coefficient describes, and how much one unusual observation can move it.">
+<style>
+/* ==========================================================================
+   HTM 514 Interactive — common shell stylesheet
+   Purdue-compatible restrained palette: white, black, Boilermaker Gold, grays.
+   Reused by every HTM 514 interactive module.
+   ========================================================================== */
+
+:root {
+  --gold: #CFB991;
+  --gold-deep: #8E7B4F;
+  --gold-wash: #F7F3EA;
+  --ink: #131313;
+  --ink-soft: #3D3D3D;
+  --gray: #6B6B6B;
+  --rule: #DCDCDC;
+  --rule-soft: #EDEDED;
+  --panel: #FAFAFA;
+  --ok: #1F5C3D;
+  --no: #8A2B22;
+  --maxw: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { border-bottom: 3px solid var(--gold); padding-bottom: 14px; margin-bottom: 26px; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.masthead .sub { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+.fit {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ---------- steps ---------- */
+
+.step {
+  border-top: 1px solid var(--rule);
+  padding: 22px 0 6px;
+}
+
+.step[data-locked="true"] { opacity: .45; }
+.step[data-locked="true"] .step-body { display: none; }
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.step-num {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 2px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
+.step h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step .hint { font-size: 13px; color: var(--gray); margin: 0 0 12px; }
+
+/* ---------- generic content ---------- */
+
+p { margin: 0 0 12px; }
+.scenario-text { font-family: Georgia, "Times New Roman", serif; font-size: 16.5px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+
+.panel h3 {
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.meaning { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.meaning div { border-left: 3px solid var(--gold); padding-left: 12px; }
+.meaning strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); }
+
+button, select, input[type="range"] { font: inherit; }
+
+button {
+  background: #FFFFFF;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:hover { background: var(--gold-wash); }
+button.primary { background: var(--gold); border-color: var(--gold-deep); font-weight: 600; }
+button.primary:hover { background: #C4AC7E; }
+button.quiet { border-color: var(--rule); color: var(--ink-soft); }
+button[disabled] { opacity: .45; cursor: not-allowed; }
+
+select { padding: 7px 8px; border: 1px solid var(--rule); border-radius: 2px; background: #fff; }
+
+input[type="range"] { width: 190px; accent-color: var(--gold-deep); }
+
+:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+
+.checkline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
+
+/* ---------- choice sets (prediction + quick check) ---------- */
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+
+.choice {
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.choice:hover { border-color: var(--ink); background: var(--gold-wash); }
+.choice[aria-pressed="true"] { border-color: var(--gold-deep); border-left-width: 5px; background: var(--gold-wash); }
+.choice[data-verdict="ok"] { border-color: var(--ok); border-left: 5px solid var(--ok); }
+.choice[data-verdict="no"] { border-color: var(--no); border-left: 5px solid var(--no); }
+
+.feedback {
+  border-left: 4px solid var(--gold);
+  background: var(--gold-wash);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.feedback[data-verdict="ok"] { border-left-color: var(--ok); }
+.feedback[data-verdict="no"] { border-left-color: var(--no); }
+.feedback .verdict { font-weight: 700; }
+
+/* ---------- charts + readouts ---------- */
+
+.charts { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+@media (min-width: 720px) { .charts { grid-template-columns: 1fr 1fr; } }
+
+.chart-box { border: 1px solid var(--rule); padding: 10px 12px 12px; }
+.chart-box h3 { font-size: 13px; margin: 0 0 2px; font-weight: 700; }
+.chart-box .cap { font-size: 12px; color: var(--gray); margin: 0 0 8px; }
+canvas { width: 100%; height: auto; display: block; }
+
+.readout { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 14px; }
+.readout caption { caption-side: top; text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); padding-bottom: 6px; }
+.readout th, .readout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); }
+.readout th { font-weight: 600; color: var(--ink-soft); }
+.readout td.num { font-variant-numeric: tabular-nums; }
+
+.runlog th, .runlog td { text-align: right; }
+.runlog th:first-child, .runlog td:first-child { text-align: left; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.footer {
+  margin-top: 34px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--gray);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — common shell (vanilla JS, no dependencies)
+
+   Provides the pieces every HTM 514 mini-module reuses:
+     HTM514.rng          seeded pseudo-random generator (reproducible)
+     HTM514.draw         random variates built on a seeded rng
+     HTM514.stats        mean, population/sample SD, min, max, binning
+     HTM514.fmt          number formatting helpers
+     HTM514.Steps        progressive step disclosure (locked -> unlocked)
+     HTM514.Choices      one prediction / quick-check question with feedback
+     HTM514.QuickCheck   randomized draw from a question pool
+     HTM514.Histogram    canvas histogram with a shared x-axis + text summary
+     HTM514.mount        assembles the page from a module definition
+
+   A module supplies content and its own "Try it" panel; the shell supplies
+   layout, flow, feedback, and charting.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  /* ---------- seeded RNG (mulberry32) ---------- */
+
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var draw = {
+    normal: function (r, mu, sd) {
+      var u = 1 - r(), v = r();
+      return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    },
+    exponential: function (r, theta) { return -Math.log(1 - r()) * theta; },
+    gamma: function (r, shapeInt, theta) {
+      var s = 0;
+      for (var i = 0; i < shapeInt; i++) s += draw.exponential(r, theta);
+      return s;
+    },
+    poisson: function (r, lambda) {
+      var L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= r(); } while (p > L);
+      return k - 1;
+    }
+  };
+
+  /* ---------- statistics ---------- */
+
+  var stats = {
+    mean: function (a) { var s = 0, i; for (i = 0; i < a.length; i++) s += a[i]; return s / a.length; },
+    sdPop: function (a) {
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / a.length);
+    },
+    sdSample: function (a) {
+      if (a.length < 2) return NaN;
+      var m = stats.mean(a), s = 0, i;
+      for (i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m);
+      return Math.sqrt(s / (a.length - 1));
+    },
+    min: function (a) { return Math.min.apply(null, a); },
+    max: function (a) { return Math.max.apply(null, a); },
+    bin: function (values, lo, hi, k) {
+      var counts = new Array(k), i, idx, w = (hi - lo) / k;
+      for (i = 0; i < k; i++) counts[i] = 0;
+      for (i = 0; i < values.length; i++) {
+        idx = Math.floor((values[i] - lo) / w);
+        if (idx < 0) idx = 0;
+        if (idx >= k) idx = k - 1;
+        counts[idx]++;
+      }
+      return counts;
+    }
+  };
+
+  /* ---------- formatting ---------- */
+
+  var fmt = {
+    n: function (x, d) {
+      if (!isFinite(x)) return "—";
+      return x.toFixed(d === undefined ? 2 : d);
+    },
+    withUnit: function (x, unit, d) {
+      if (!isFinite(x)) return "—";
+      var v = fmt.n(x, d);
+      return unit.prefix ? unit.prefix + v : v + (unit.suffix || "");
+    }
+  };
+
+  /* ---------- small DOM helpers ---------- */
+
+  function h(tag, attrs, kids) {
+    var node = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  function announce(msg) {
+    var live = document.getElementById("htm514-live");
+    if (live) live.textContent = msg;
+  }
+
+  /* ---------- step flow ---------- */
+
+  function Steps(root) { this.root = root; this.list = []; }
+
+  Steps.prototype.add = function (opts) {
+    var body = h("div", { class: "step-body" });
+    var sec = h("section", { class: "step", id: "step-" + opts.id }, [
+      h("div", { class: "step-head" }, [
+        h("span", { class: "step-num", text: String(this.list.length + 1) }),
+        h("h2", { text: opts.title })
+      ]),
+      body
+    ]);
+    if (opts.hint) body.appendChild(h("p", { class: "hint", text: opts.hint }));
+    if (opts.locked) sec.setAttribute("data-locked", "true");
+    this.root.appendChild(sec);
+    var entry = { id: opts.id, section: sec, body: body };
+    this.list.push(entry);
+    return entry;
+  };
+
+  Steps.prototype.unlock = function (id, focusIt) {
+    var e = this.list.filter(function (s) { return s.id === id; })[0];
+    if (!e) return;
+    e.section.removeAttribute("data-locked");
+    if (focusIt) e.section.scrollIntoView({ block: "nearest" });
+  };
+
+  /* ---------- one multiple-choice question with feedback ---------- */
+
+  function Choices(question, onAnswer) {
+    // question: {stem, options:[{text, correct, why}], shuffle:false to keep order}
+    if (question.shuffle !== false) {
+      var opts = question.options.slice(), j, tmp, i2;
+      for (i2 = opts.length - 1; i2 > 0; i2--) {
+        j = Math.floor(Math.random() * (i2 + 1));
+        tmp = opts[i2]; opts[i2] = opts[j]; opts[j] = tmp;
+      }
+      question = { stem: question.stem, options: opts };
+    }
+    var wrap = h("div");
+    if (question.stem) wrap.appendChild(h("p", { class: "scenario-text", html: question.stem }));
+    var box = h("div", { class: "choices" });
+    var fb = h("div", { class: "feedback", hidden: "hidden" });
+    var answered = false;
+
+    question.options.forEach(function (opt, i) {
+      var b = h("button", {
+        class: "choice", type: "button", "aria-pressed": "false", html: opt.text,
+        onclick: function () {
+          if (answered) return;
+          answered = true;
+          Array.prototype.forEach.call(box.children, function (c, j) {
+            c.setAttribute("aria-pressed", j === i ? "true" : "false");
+            if (question.options[j].correct) c.setAttribute("data-verdict", "ok");
+            else if (j === i) c.setAttribute("data-verdict", "no");
+          });
+          var verdict = opt.correct ? "ok" : "no";
+          fb.setAttribute("data-verdict", verdict);
+          fb.innerHTML = '<span class="verdict">' + (opt.correct ? "Correct." : "Not quite.") + "</span> " + opt.why;
+          fb.hidden = false;
+          announce((opt.correct ? "Correct. " : "Not quite. ") + fb.textContent);
+          if (onAnswer) onAnswer(i, opt);
+        }
+      });
+      box.appendChild(b);
+    });
+
+    wrap.appendChild(box);
+    wrap.appendChild(fb);
+    this.el = wrap;
+  }
+
+  /* ---------- quick check: randomized draw from a pool ---------- */
+
+  function QuickCheck(pool, seed) {
+    var self = this;
+    var r = rng(seed || 20240514);
+    var used = [];
+    var host = h("div");
+    var slot = h("div");
+    var again = h("button", {
+      class: "quiet", type: "button", text: "Another question",
+      onclick: function () { self.next(); }
+    });
+
+    this.next = function () {
+      if (used.length >= pool.length) used = [];
+      var candidates = pool.map(function (q, i) { return i; }).filter(function (i) { return used.indexOf(i) < 0; });
+      var pick = candidates[Math.floor(r() * candidates.length)];
+      used.push(pick);
+      slot.innerHTML = "";
+      slot.appendChild(new Choices(pool[pick]).el);
+    };
+
+    host.appendChild(slot);
+    host.appendChild(again);
+    this.el = host;
+    this.next();
+  }
+
+  /* ---------- canvas histogram ---------- */
+
+  function Histogram(canvas, opts) {
+    this.c = canvas;
+    this.opts = opts || {};
+    this.values = [];
+    this.marks = [];
+  }
+
+  Histogram.prototype.set = function (values, marks) {
+    this.values = values || [];
+    this.marks = marks || [];
+    this.render();
+  };
+
+  Histogram.prototype.render = function () {
+    var o = this.opts, c = this.c;
+    var dpr = global.devicePixelRatio || 1;
+    var W = c.clientWidth || 400, H = o.height || 190;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.height = H + "px";
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+
+    var padL = 6, padR = 6, padB = 26, padT = 8;
+    var lo = o.lo, hi = o.hi, k = o.bins || 44;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var counts = this.values.length ? stats.bin(this.values, lo, hi, k) : new Array(k).fill(0);
+    var peak = Math.max.apply(null, counts) || 1;
+    var bw = plotW / k;
+
+    // bars
+    g.fillStyle = o.fill || "#CFB991";
+    g.strokeStyle = "#8E7B4F";
+    g.lineWidth = 0.5;
+    for (var i = 0; i < k; i++) {
+      if (!counts[i]) continue;
+      var bh = (counts[i] / peak) * plotH;
+      var x = padL + i * bw;
+      g.fillRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+      g.strokeRect(x, padT + plotH - bh, Math.max(bw - 0.6, 0.8), bh);
+    }
+
+    // baseline
+    g.strokeStyle = "#131313"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(padL, padT + plotH + 0.5); g.lineTo(W - padR, padT + plotH + 0.5); g.stroke();
+
+    // vertical marks (e.g., the true population mean)
+    var self = this;
+    this.marks.forEach(function (m) {
+      if (m.value < lo || m.value > hi) return;
+      var x = padL + ((m.value - lo) / (hi - lo)) * plotW;
+      g.save();
+      g.strokeStyle = m.color || "#131313";
+      g.setLineDash(m.dash || [4, 3]);
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(x, padT); g.lineTo(x, padT + plotH); g.stroke();
+      g.restore();
+      if (m.label) {
+        g.fillStyle = "#131313";
+        g.font = "11px Segoe UI, Arial, sans-serif";
+        var tw = g.measureText(m.label).width;
+        var tx = Math.min(Math.max(x - tw / 2, padL), W - padR - tw);
+        g.fillText(m.label, tx, padT + 10);
+      }
+      void self;
+    });
+
+    // axis labels
+    g.fillStyle = "#6B6B6B";
+    g.font = "11px Segoe UI, Arial, sans-serif";
+    g.fillText(o.loLabel || "", padL, H - 8);
+    var hiLab = o.hiLabel || "";
+    g.fillText(hiLab, W - padR - g.measureText(hiLab).width, H - 8);
+    if (o.axisLabel) {
+      var al = o.axisLabel;
+      g.fillText(al, padL + plotW / 2 - g.measureText(al).width / 2, H - 8);
+    }
+  };
+
+  /* ---------- page assembly ---------- */
+
+  function mount(module) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+
+    root.appendChild(h("header", { class: "masthead" }, [
+      h("p", { class: "eyebrow", text: "HTM 514 Interactive · optional practice" }),
+      h("h1", { text: module.title }),
+      h("p", { class: "sub", text: module.subtitle }),
+      h("p", { class: "fit", text: module.courseFit })
+    ]));
+
+    var steps = new Steps(root);
+    module.build(steps, { h: h, announce: announce });
+
+    root.appendChild(h("div", { class: "footer", html: module.footer || "" }));
+    root.appendChild(h("div", { id: "htm514-live", class: "sr-only", "aria-live": "polite" }));
+  }
+
+  global.HTM514 = {
+    rng: rng, draw: draw, stats: stats, fmt: fmt,
+    h: h, announce: announce,
+    Steps: Steps, Choices: Choices, QuickCheck: QuickCheck, Histogram: Histogram,
+    mount: mount
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.HTM514;
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* ==========================================================================
+   HTM 514 Interactive — Module 3
+   "Correlation Explorer"
+
+   Fits beside Week 4 (Relationships Among Variables: scatterplots,
+   correlation and covariance). One idea only: correlation describes the
+   direction and strength of a LINEAR relationship between two numerical
+   variables, and moving a single observation can change it a lot.
+
+   Uses the frozen shell in assets/htm514-shell.js without modification.
+   No network, no storage.
+   ========================================================================== */
+
+(function (global) {
+  "use strict";
+
+  var HAS_DOM = typeof document !== "undefined";
+  var H = global.HTM514 ||
+    (typeof require === "function" ? require("../assets/htm514-shell.js") : null);
+
+  /* ------------------------------------------------------------------ math */
+
+  /* Pearson sample correlation. Returns null when either variable has no
+     variation, because r is undefined there — never NaN or Infinity. */
+  function pearson(xs, ys) {
+    var n = xs.length, i, mx = 0, my = 0, sxy = 0, sxx = 0, syy = 0, a, b;
+    if (n < 2 || ys.length !== n) return null;
+    for (i = 0; i < n; i++) { mx += xs[i]; my += ys[i]; }
+    mx /= n; my /= n;
+    for (i = 0; i < n; i++) {
+      a = xs[i] - mx; b = ys[i] - my;
+      sxy += a * b; sxx += a * a; syy += b * b;
+    }
+    if (sxx === 0 || syy === 0) return null;
+    var r = sxy / Math.sqrt(sxx * syy);
+    if (r > 1) r = 1;                      // guard against floating-point drift
+    if (r < -1) r = -1;
+    return r;
+  }
+
+  function rOf(points) {
+    return pearson(points.map(function (p) { return p[0]; }),
+                   points.map(function (p) { return p[1]; }));
+  }
+
+  /* Rough descriptive labels — teaching aids, not fixed scientific cut-offs.
+     Computed from the ROUNDED value so the words never contradict the number
+     shown on screen. */
+  function describe(r) {
+    if (r === null) return "undefined";
+    var a = Math.abs(Math.round(r * 100) / 100);
+    var dir = r > 0 ? "positive" : "negative";
+    if (a < 0.15) return "little or no linear relationship";
+    if (a < 0.40) return "weak " + dir;
+    if (a < 0.70) return "moderate " + dir;
+    return "strong " + dir;
+  }
+
+  function fmtR(r) { return r === null ? "undefined" : (r < 0 ? "\u2212" : "") + Math.abs(r).toFixed(2); }
+
+  /* --------------------------------------------------------------- content */
+
+  var SCENARIOS = [
+    {
+      id: "hotel",
+      label: "Hotel — room rate and occupancy",
+      x: { name: "Average room rate", unit: "$", min: 80, max: 260, step: 5, decimals: 0 },
+      y: { name: "Occupancy", unit: "%", min: 40, max: 100, step: 1, decimals: 0 },
+      note: "Ten weeks of records from one property. The highlighted week is the one you can move.",
+      caution: "These observations show an association in this sample. Season, competitor pricing, " +
+               "events in town, and the property's own marketing may all contribute.",
+      focus: 8,
+      points: [[95, 84], [110, 92], [125, 78], [135, 88], [150, 72], [165, 83], [180, 68], [200, 79], [215, 62], [240, 71]]
+    },
+    {
+      id: "staff",
+      label: "Front desk — experience and service rating",
+      x: { name: "Front-desk experience", unit: " months", min: 0, max: 60, step: 1, decimals: 0 },
+      y: { name: "Guest service rating", unit: " / 100", min: 50, max: 100, step: 1, decimals: 0 },
+      note: "Ten front-desk employees at one hotel. The highlighted employee is the one you can move.",
+      caution: "Experience and rating move together in this sample. Shift assignment, training, and " +
+               "which guests each employee happens to serve may also play a part.",
+      focus: 9,
+      points: [[3, 66], [6, 78], [9, 70], [12, 74], [16, 84], [20, 77], [26, 88], [32, 82], [38, 94], [46, 86]]
+    },
+    {
+      id: "ads",
+      label: "Restaurant — marketing spend and reservations",
+      x: { name: "Weekly marketing spend", unit: "$00", min: 0, max: 30, step: 1, decimals: 0 },
+      y: { name: "Weekly reservations", unit: "", min: 40, max: 90, step: 1, decimals: 0 },
+      note: "Ten weeks at one restaurant. The highlighted week is the one you can move.",
+      caution: "Spend and reservations are only loosely associated here. Weather, holidays, and " +
+               "reviews are not in this picture at all.",
+      focus: 9,
+      points: [[4, 58], [6, 52], [7, 66], [9, 57], [11, 71], [12, 55], [14, 68], [16, 62], [18, 71], [21, 59]]
+    }
+  ];
+
+  /* One fixed curved pattern, used for the "small r does not mean no
+     relationship" point. Symmetric by construction, so r is exactly 0. */
+  var CURVED = {
+    x: { name: "Servers on shift", unit: "", min: 3, max: 14 },
+    y: { name: "Guest satisfaction", unit: " / 100", min: 50, max: 95 },
+    points: [[4, 58], [5, 70], [6, 79], [7, 85], [8, 88], [9, 88], [10, 85], [11, 79], [12, 70], [13, 58]]
+  };
+
+  var core = {
+    scenarios: SCENARIOS,
+    curved: CURVED,
+    pearson: pearson,
+    rOf: rOf,
+    describe: describe,
+    fmtR: fmtR
+  };
+
+  global.HTM514_CORR = core;
+  if (typeof module !== "undefined" && module.exports) module.exports = core;
+  if (!HAS_DOM || !H) return;
+
+  var h = H.h;
+  var SVGNS = "http://www.w3.org/2000/svg";
+
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag), k;
+    for (k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  function val(v, ax) { return ax.unit === "$" ? "$" + v : v + ax.unit; }
+
+  /* ---------------------------------------------------------- quick check */
+
+  function quickCheck(sc) {
+    var r0 = rOf(sc.points);
+    var goesWith = r0 > 0 ? "higher" : "lower";
+    return [
+      {
+        stem: "What does the sign of r tell you?",
+        options: [
+          { text: "The direction of the linear relationship — positive rises from left to right, negative falls.",
+            correct: true,
+            why: "Direction only. How tightly the points cluster around a straight line is carried by the " +
+                 "size of r, not its sign." },
+          { text: "How strong the relationship is.", correct: false,
+            why: "That is the magnitude. r = \u22120.90 describes a tighter pattern than r = +0.30, even " +
+                 "though one is negative." },
+          { text: "Whether one variable causes the other to rise or fall.", correct: false,
+            why: "r says nothing about cause. It describes the pattern in these paired observations." }
+        ]
+      },
+      {
+        stem: "r is close to 0 for a set of observations. What does that tell you specifically?",
+        options: [
+          { text: "There is little LINEAR association — the points do not cluster around any straight line.",
+            correct: true,
+            why: "Specifically linear. The servers-on-shift example has r = 0.00 and a very clear pattern: " +
+                 "satisfaction rises, peaks, then falls." },
+          { text: "The two variables are unrelated in every sense.", correct: false,
+            why: "Pearson r summarizes straight-line association only. A curved pattern can produce r near " +
+                 "zero while still being a strong relationship." },
+          { text: "The data must be measurement error.", correct: false,
+            why: "Near-zero r is a legitimate result. It says the straight-line summary is not useful here, " +
+                 "not that the data are bad." }
+        ]
+      },
+      {
+        stem: "Can one unusual observation change r substantially?",
+        options: [
+          { text: "Yes — a single point far from the rest can pull r up or down noticeably, especially in a small sample.",
+            correct: true,
+            why: "You just did it. With only ten observations, one unusual point can materially affect " +
+                 "the means and the cross-products that r is built from — most of all when it sits far " +
+                 "from the centre of the data." },
+          { text: "No — r uses every observation, so any single point has little effect.", correct: false,
+            why: "Using every observation is exactly why one unusual value matters: it shifts both means, " +
+                 "and every cross-product is measured from those means." },
+          { text: "Only if the sample has fewer than five observations.", correct: false,
+            why: "Ten observations were enough here. Larger samples dilute the effect, but they do not " +
+                 "remove it." }
+        ]
+      },
+      {
+        stem: "A strong correlation is found between two business measures. Does that establish that one causes the other?",
+        options: [
+          { text: "No — correlation describes association, not cause.", correct: true,
+            why: "Another variable may drive both, the direction may run the other way, or the sample may " +
+                 "have been selected in a way that creates the pattern." },
+          { text: "Yes, if r is above 0.8.", correct: false,
+            why: "No value of r establishes causation. A large r means the points cluster tightly around a " +
+                 "line — nothing more." },
+          { text: "Yes, provided the sample is large enough.", correct: false,
+            why: "Sample size affects precision, not the kind of claim r supports." }
+        ]
+      },
+      {
+        stem: "Which statement about the " + sc.x.name.toLowerCase() + " and " + sc.y.name.toLowerCase() +
+              " data is an appropriate managerial reading?",
+        options: [
+          { text: "\"In these observations, higher " + sc.x.name.toLowerCase() + " is associated with " +
+                  goesWith + " " + sc.y.name.toLowerCase() + ".\"", correct: true,
+            why: "It stays with what the sample shows and does not promise what would happen if management " +
+                 "changed something." },
+          { text: "\"Changing " + sc.x.name.toLowerCase() + " will move " + sc.y.name.toLowerCase() +
+                  " by the amount r indicates.\"", correct: false,
+            why: "Two problems: r is not an amount of change, and an association in observed data does not " +
+                 "tell you what an intervention would do." },
+          { text: "\"" + sc.y.name + " depends on " + sc.x.name.toLowerCase() + " and nothing else.\"",
+            correct: false,
+            why: "Nothing in a scatterplot of two variables rules out everything else that was happening." }
+        ]
+      },
+      {
+        stem: "Two variables have a clear curved relationship. What would Pearson r likely show?",
+        options: [
+          { text: "It could be small, because r measures straight-line association only.", correct: true,
+            why: "Which is why the course tells you to look at the scatterplot first. The picture shows a " +
+                 "pattern the single number cannot." },
+          { text: "It would be large, because there is a clear relationship.", correct: false,
+            why: "Clear does not mean linear. In the servers-on-shift example the relationship is obvious " +
+                 "and r is 0.00." },
+          { text: "It would be exactly zero in every curved case.", correct: false,
+            why: "Only when the curve is symmetric, as it happens to be in that example. A rising curve can " +
+                 "still produce a sizeable r." }
+        ]
+      }
+    ];
+  }
+
+  /* ----------------------------------------------------------- the page -- */
+
+  var pageModule = {
+    title: "What the correlation is telling you",
+    subtitle: "Direction, strength, and how much one unusual observation can move the number.",
+    courseFit: "Optional practice for Week 4 (relationships among variables: scatterplots, correlation " +
+               "and covariance). About 6 minutes. Nothing is submitted or recorded.",
+    footer: "HTM 514 · Business Analysis for Service Industry · optional supplemental interactive. " +
+            "Everything runs in your browser; nothing is transmitted or stored.",
+
+    build: function (steps) {
+      var state = { sc: SCENARIOS[0], pts: [], revealed: false, challenge: 0, done: [false, false, false] };
+
+      /* --- step 1: the data --- */
+      var s1 = steps.add({ id: "data", title: "The data" });
+      var note = h("p", { class: "scenario-text" });
+      var plotBox = h("div", { class: "chart-box" });
+      var plot = svgEl("svg", { viewBox: "0 0 640 270", role: "img", style: "width:100%;height:auto" });
+      plotBox.appendChild(plot);
+      var rLine = h("p", { class: "hint" });
+      var picker = h("select", {
+        id: "scenario-picker", "aria-label": "Choose a pair of variables",
+        onchange: function () { setScenario(this.value); }
+      });
+      SCENARIOS.forEach(function (sc) { picker.appendChild(h("option", { value: sc.id, text: sc.label })); });
+      s1.body.appendChild(note);
+      s1.body.appendChild(plotBox);
+      s1.body.appendChild(rLine);
+      s1.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [h("label", { for: "scenario-picker", text: "Variables" }), picker])
+      ]));
+
+      /* --- step 2: predict --- */
+      var s2 = steps.add({
+        id: "predict", title: "Predict",
+        hint: "Read the pattern before you read the number."
+      });
+      var predictSlot = h("div");
+      s2.body.appendChild(predictSlot);
+
+      /* --- step 3: move one observation --- */
+      var s3 = steps.add({
+        id: "move", title: "Move one observation", locked: true,
+        hint: "Drag the gold square, or use the two sliders. Both do the same thing."
+      });
+      var xRange = h("input", {
+        type: "range", id: "x-range", "aria-label": "X value of the highlighted observation",
+        oninput: function () { moveFocus(Number(this.value), null); }
+      });
+      var yRange = h("input", {
+        type: "range", id: "y-range", "aria-label": "Y value of the highlighted observation",
+        oninput: function () { moveFocus(null, Number(this.value)); }
+      });
+      var xLab = h("label", { for: "x-range", id: "x-lab" });
+      var yLab = h("label", { for: "y-range", id: "y-lab" });
+      s3.body.appendChild(h("div", { class: "controls" }, [
+        h("div", { class: "control" }, [xLab, xRange]),
+        h("div", { class: "control" }, [yLab, yRange]),
+        h("button", {
+          class: "quiet", type: "button", text: "Restore the original pattern",
+          onclick: function () { restore(); }
+        })
+      ]));
+      var live = h("div", { class: "feedback" });
+      s3.body.appendChild(live);
+      var chBtns = h("div", { class: "controls" });
+      [0, 1, 2].forEach(function (i) {
+        chBtns.appendChild(h("button", {
+          type: "button", "data-challenge": String(i), text: "Challenge " + (i + 1),
+          onclick: function () { state.challenge = i; restore(); renderChallenge(); }
+        }));
+      });
+      s3.body.appendChild(chBtns);
+      var chBox = h("div", { class: "panel" });
+      s3.body.appendChild(chBox);
+
+      /* --- step 4: what r does and does not tell you --- */
+      var s4 = steps.add({ id: "read", title: "What r does and does not tell you", locked: true });
+      var curvedBox = h("div", { class: "chart-box" });
+      var curvedPlot = svgEl("svg", { viewBox: "0 0 640 230", role: "img", style: "width:100%;height:auto" });
+      curvedBox.appendChild(h("h3", { text: "A clear relationship with r = 0.00" }));
+      curvedBox.appendChild(h("p", { class: "cap",
+        text: "In this constructed example, satisfaction is lower when staffing is very low or very high " +
+              "and higher in the middle. Pearson r is 0.00." }));
+      curvedBox.appendChild(curvedPlot);
+      s4.body.appendChild(curvedBox);
+      s4.body.appendChild(h("p", {
+        html: "Pearson correlation summarizes <strong>linear</strong> association — how tightly the points " +
+              "cluster around a straight line. A small r does not mean there is no relationship of any kind, " +
+              "which is why the course tells you to look at the scatterplot first."
+      }));
+      var meaning = h("div", { class: "panel" });
+      s4.body.appendChild(meaning);
+
+      /* --- step 5: quick check --- */
+      var s5 = steps.add({ id: "check", title: "Quick check", locked: true });
+      var checkSlot = h("div");
+      s5.body.appendChild(checkSlot);
+      s5.body.appendChild(h("div", { class: "controls" }, [
+        h("button", {
+          class: "primary", type: "button", text: "Try another pair of variables",
+          onclick: function () {
+            var i = SCENARIOS.indexOf(state.sc);
+            var next = SCENARIOS[(i + 1) % SCENARIOS.length];
+            picker.value = next.id;
+            setScenario(next.id);
+            document.getElementById("step-data").scrollIntoView({ block: "start" });
+          }
+        })
+      ]));
+
+      /* ------------------------------------------------------ challenges - */
+
+      var CHALLENGES = [
+        {
+          ask: function (sc, r0) {
+            return "Move the highlighted observation so the points cluster <em>more</em> tightly around a " +
+                   "straight line — make the relationship stronger than its starting value of r = " +
+                   fmtR(r0) + ".";
+          },
+          met: function (r, r0) { return r !== null && r0 !== null && r * r0 > 0 && Math.abs(r) >= Math.abs(r0) + 0.05; },
+          win: "That is the whole idea of strength: the tighter the points sit around one straight line, the " +
+               "larger |r| gets. Nothing about the other nine observations changed."
+        },
+        {
+          ask: function (sc, r0) {
+            return "Now the opposite. Can <em>one</em> unusual observation make the relationship look much " +
+                   "weaker? Try dragging the highlighted point well away from the others — get |r| down to " +
+                   fmtR(0.7 * Math.abs(r0)) + " or below, about seven tenths of where it started.";
+          },
+          met: function (r, r0) { return r !== null && r0 !== null && Math.abs(r) <= 0.7 * Math.abs(r0); },
+          win: "One observation out of ten did that. This is why an unusual point deserves a look before " +
+               "you report a correlation — is it an error, or a real case worth understanding?"
+        },
+        {
+          ask: function () {
+            return "Last one. Can you get the correlation close to zero — |r| below 0.15 — by moving only " +
+                   "the highlighted observation?";
+          },
+          met: function (r) { return r !== null && Math.abs(r) < 0.15; },
+          win: "Near zero means the points no longer cluster around any straight line. Worth noticing: the " +
+               "other nine observations still carry the pattern you started with."
+        }
+      ];
+
+      /* ---------------------------------------------------------- render - */
+
+      function setScenario(id) {
+        state.sc = SCENARIOS.filter(function (s) { return s.id === id; })[0];
+        state.pts = state.sc.points.map(function (p) { return [p[0], p[1]]; });
+        state.revealed = false;
+        state.challenge = 0;
+        state.done = [false, false, false];
+        var sc = state.sc;
+        note.textContent = sc.note;
+        xRange.min = sc.x.min; xRange.max = sc.x.max; xRange.step = sc.x.step;
+        yRange.min = sc.y.min; yRange.max = sc.y.max; yRange.step = sc.y.step;
+        syncControls();
+        renderPlot(plot, state.pts, sc, sc.focus, true);
+        renderPlot(curvedPlot, CURVED.points, CURVED, -1, false);
+        renderPrediction();
+        checkSlot.innerHTML = "";
+        checkSlot.appendChild(new H.QuickCheck(quickCheck(sc), 404).el);
+        renderChallenge();
+        renderMeaning();
+        rLine.innerHTML = "The correlation for these ten observations is revealed once you have made your " +
+                          "prediction below.";
+        ["move", "read", "check"].forEach(function (k) {
+          document.getElementById("step-" + k).setAttribute("data-locked", "true");
+        });
+      }
+
+      function syncControls() {
+        var sc = state.sc, f = state.pts[sc.focus];
+        xRange.value = String(f[0]); yRange.value = String(f[1]);
+        xLab.textContent = sc.x.name + " (" + val(f[0], sc.x) + ")";
+        yLab.textContent = sc.y.name + " (" + val(f[1], sc.y) + ")";
+      }
+
+      function currentR() { return rOf(state.pts); }
+
+      function renderRLine() {
+        var r = currentR();
+        if (!state.revealed) return;
+        if (r === null) {
+          rLine.innerHTML = "<strong>r is undefined</strong> — one of the two variables has no variation, " +
+                            "so there is no linear pattern to measure.";
+        } else {
+          rLine.innerHTML = "<strong>r = " + fmtR(r) + "</strong> — " + describe(r) +
+            " in these observations. (These labels are rough descriptors for reading a scatterplot, " +
+            "not fixed thresholds.)";
+        }
+      }
+
+      function renderPrediction() {
+        predictSlot.innerHTML = "";
+        var sc = state.sc, r0 = rOf(sc.points);
+        var band = describe(r0);
+        var reveal = "The correlation for these observations is <strong>r = " + fmtR(r0) + "</strong>: " +
+          band + ". The points " + (r0 > 0 ? "rise" : "fall") + " from left to right, and how tightly " +
+          "they cluster around a straight line is what the size of r reports.";
+        function opt(text, ok) {
+          return { text: text, correct: ok, why: reveal };
+        }
+        var q = {
+          stem: "Looking only at the pattern, what kind of linear relationship do these ten observations show?",
+          shuffle: false,
+          options: [
+            opt("Strong positive", band === "strong positive"),
+            opt("Weak positive", band === "weak positive" || band === "moderate positive"),
+            opt("Little or no linear relationship", band === "little or no linear relationship"),
+            opt("Weak negative", band === "weak negative" || band === "moderate negative"),
+            opt("Strong negative", band === "strong negative")
+          ]
+        };
+        predictSlot.appendChild(new H.Choices(q, function () {
+          state.revealed = true;
+          renderRLine();
+          renderLive();
+          ["move", "read", "check"].forEach(function (k) { steps.unlock(k); });
+          H.announce("Correlation revealed: r equals " + fmtR(r0) + ".");
+        }).el);
+      }
+
+      function renderChallenge() {
+        var sc = state.sc, r0 = rOf(sc.points), r = currentR();
+        var c = CHALLENGES[state.challenge];
+        Array.prototype.forEach.call(chBtns.children, function (b, i) {
+          b.setAttribute("aria-pressed", i === state.challenge ? "true" : "false");
+          b.className = i === state.challenge ? "primary" : "";
+        });
+        var met = c.met(r, r0);
+        if (met) state.done[state.challenge] = true;
+        chBox.innerHTML =
+          "<h3>Challenge " + (state.challenge + 1) + " of 3</h3>" +
+          "<p>" + c.ask(sc, r0) + "</p>" +
+          (met ? "<p><strong>Done.</strong> " + c.win + "</p>"
+               : "<p class='hint'>Currently r = " + fmtR(r) + ". Starting value was r = " + fmtR(r0) + ".</p>");
+      }
+
+      function renderMeaning() {
+        var sc = state.sc;
+        meaning.innerHTML =
+          "<h3>Reading it correctly</h3><div class='meaning'>" +
+          "<div><strong>What r means</strong>The direction and strength of the <em>linear</em> association " +
+          "between " + sc.x.name.toLowerCase() + " and " + sc.y.name.toLowerCase() + " in these paired " +
+          "observations. Between \u22121 and +1; the sign gives direction, the size gives how tightly the " +
+          "points cluster around a straight line.</div>" +
+          "<div><strong>What it does not mean</strong>That one variable causes the other, that the " +
+          "relationship holds outside the range of these observations, or that a small r rules out a " +
+          "curved relationship. " + sc.caution + "</div>" +
+          "<div><strong>What a manager could reasonably conclude</strong>\"In this sample, higher " +
+          sc.x.name.toLowerCase() + " goes with " + (rOf(sc.points) > 0 ? "higher " : "lower ") +
+          sc.y.name.toLowerCase() + ".\" Not: \"changing " + sc.x.name.toLowerCase() + " will move " +
+          sc.y.name.toLowerCase() + " by this much.\"</div></div>";
+      }
+
+      function moveFocus(x, y) {
+        var sc = state.sc, f = state.pts[sc.focus];
+        if (x !== null && x !== undefined) f[0] = clamp(x, sc.x.min, sc.x.max);
+        if (y !== null && y !== undefined) f[1] = clamp(y, sc.y.min, sc.y.max);
+        syncControls();
+        renderPlot(plot, state.pts, sc, sc.focus, true);
+        renderRLine();
+        renderLive();
+        renderChallenge();
+      }
+
+      function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+      function restore() {
+        state.pts = state.sc.points.map(function (p) { return [p[0], p[1]]; });
+        syncControls();
+        renderPlot(plot, state.pts, state.sc, state.sc.focus, true);
+        renderRLine();
+        renderLive();
+        renderChallenge();
+      }
+
+      function renderLive() {
+        var sc = state.sc, r = currentR(), r0 = rOf(sc.points), f = state.pts[sc.focus];
+        if (r === null) {
+          live.setAttribute("data-verdict", "");
+          live.innerHTML = "<span class='verdict'>r is undefined here.</span> One of the two variables has " +
+            "no variation left, so there is no straight-line pattern to measure.";
+          return;
+        }
+        live.setAttribute("data-verdict", "ok");
+        live.innerHTML = "<span class='verdict'>r = " + fmtR(r) + "</span> — " + describe(r) +
+          ". Started at r = " + fmtR(r0) + ". The highlighted observation is now at " +
+          val(f[0], sc.x) + ", " + val(f[1], sc.y) + "; the other nine have not moved.";
+        H.announce("r is now " + fmtR(r) + ", " + describe(r) + ".");
+      }
+
+      /* ------------------------------------------------------------ plot - */
+
+      function renderPlot(svg, pts, sc, focus, interactive) {
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        var W = 640, Ht = Number(svg.getAttribute("viewBox").split(" ")[3]);
+        var L = 62, R = 16, T = 14, B = 44;
+        var pw = W - L - R, ph = Ht - T - B;
+        var X = function (v) { return L + ((v - sc.x.min) / (sc.x.max - sc.x.min)) * pw; };
+        var Y = function (v) { return T + ph - ((v - sc.y.min) / (sc.y.max - sc.y.min)) * ph; };
+
+        // axes
+        svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: T + ph, stroke: "#131313", "stroke-width": 1 }));
+        svg.appendChild(svgEl("line", { x1: L, y1: T + ph, x2: L + pw, y2: T + ph, stroke: "#131313", "stroke-width": 1 }));
+
+        // ticks: min, middle, max on each axis
+        [0, 0.5, 1].forEach(function (t) {
+          var xv = sc.x.min + t * (sc.x.max - sc.x.min);
+          var yv = sc.y.min + t * (sc.y.max - sc.y.min);
+          var tx = svgEl("text", { x: X(xv), y: T + ph + 16, "text-anchor": "middle",
+            "font-size": "11", fill: "#6B6B6B", "font-family": "Segoe UI, Arial, sans-serif" });
+          tx.textContent = val(Math.round(xv), sc.x);
+          svg.appendChild(tx);
+          var ty = svgEl("text", { x: L - 8, y: Y(yv) + 4, "text-anchor": "end",
+            "font-size": "11", fill: "#6B6B6B", "font-family": "Segoe UI, Arial, sans-serif" });
+          ty.textContent = val(Math.round(yv), sc.y);
+          svg.appendChild(ty);
+          svg.appendChild(svgEl("line", { x1: L - 4, y1: Y(yv), x2: L, y2: Y(yv), stroke: "#131313" }));
+          svg.appendChild(svgEl("line", { x1: X(xv), y1: T + ph, x2: X(xv), y2: T + ph + 4, stroke: "#131313" }));
+        });
+
+        // axis titles
+        var xt = svgEl("text", { x: L + pw / 2, y: Ht - 8, "text-anchor": "middle", "font-size": "12",
+          fill: "#131313", "font-family": "Segoe UI, Arial, sans-serif" });
+        xt.textContent = sc.x.name + (sc.x.unit ? " (" + sc.x.unit.trim() + ")" : "");
+        svg.appendChild(xt);
+        var yt = svgEl("text", { x: 14, y: T + ph / 2, "text-anchor": "middle", "font-size": "12",
+          fill: "#131313", "font-family": "Segoe UI, Arial, sans-serif",
+          transform: "rotate(-90 14 " + (T + ph / 2) + ")" });
+        yt.textContent = sc.y.name + (sc.y.unit ? " (" + sc.y.unit.trim() + ")" : "");
+        svg.appendChild(yt);
+
+        // points
+        pts.forEach(function (p, i) {
+          if (i === focus) return;
+          svg.appendChild(svgEl("circle", { cx: X(p[0]), cy: Y(p[1]), r: 5,
+            fill: "#FFFFFF", stroke: "#131313", "stroke-width": 1.5 }));
+        });
+
+        if (focus >= 0) {
+          var f = pts[focus];
+          var sq = svgEl("rect", {
+            x: X(f[0]) - 7, y: Y(f[1]) - 7, width: 14, height: 14,
+            fill: "#CFB991", stroke: "#131313", "stroke-width": 2,
+            tabindex: interactive ? "0" : "-1",
+            role: "img",
+            "aria-label": "Highlighted observation at " + val(f[0], sc.x) + ", " + val(f[1], sc.y) +
+              (interactive ? ". Drag it, use the arrow keys, or use the two sliders below." : "")
+          });
+          if (interactive) {
+            sq.style.cursor = "move";
+            sq.addEventListener("pointerdown", startDrag);
+            sq.addEventListener("keydown", arrowKeys);
+          }
+          svg.appendChild(sq);
+          var tag = svgEl("text", { x: X(f[0]) + 12, y: Y(f[1]) - 10, "font-size": "11",
+            fill: "#131313", "font-family": "Segoe UI, Arial, sans-serif" });
+          tag.textContent = "highlighted";
+          svg.appendChild(tag);
+        }
+
+        svg.setAttribute("aria-label",
+          "Scatterplot of " + sc.y.name + " against " + sc.x.name + " for " + pts.length +
+          " observations" + (focus >= 0 ? ", with one highlighted observation at " +
+          val(pts[focus][0], sc.x) + ", " + val(pts[focus][1], sc.y) : "") + ". " +
+          (rOf(pts) === null ? "Correlation is undefined." : "Correlation r = " + fmtR(rOf(pts)) + "."));
+
+        function toData(evt) {
+          var box = svg.getBoundingClientRect();
+          var f0 = state.pts[sc.focus];
+          if (!box.width || !box.height) return [f0[0], f0[1]];   // not laid out yet
+          var sx = W / box.width, sy = Ht / box.height;
+          var px = (evt.clientX - box.left) * sx, py = (evt.clientY - box.top) * sy;
+          var xv = sc.x.min + ((px - L) / pw) * (sc.x.max - sc.x.min);
+          var yv = sc.y.min + ((T + ph - py) / ph) * (sc.y.max - sc.y.min);
+          return [snap(xv, sc.x), snap(yv, sc.y)];
+        }
+        function snap(v, ax) {
+          var st = ax.step || 1;
+          return clamp(Math.round(v / st) * st, ax.min, ax.max);
+        }
+        function startDrag(evt) {
+          evt.preventDefault();
+          if (evt.target.setPointerCapture && evt.pointerId !== undefined) {
+            try { evt.target.setPointerCapture(evt.pointerId); } catch (e) { /* ignore */ }
+          }
+          var move = function (e) { var d = toData(e); moveFocus(d[0], d[1]); };
+          var up = function () {
+            svg.removeEventListener("pointermove", move);
+            svg.removeEventListener("pointerup", up);
+            global.removeEventListener("pointerup", up);
+          };
+          svg.addEventListener("pointermove", move);
+          svg.addEventListener("pointerup", up);
+          global.addEventListener("pointerup", up);
+        }
+        function arrowKeys(evt) {
+          var f2 = state.pts[sc.focus], dx = 0, dy = 0;
+          if (evt.key === "ArrowLeft") dx = -sc.x.step;
+          else if (evt.key === "ArrowRight") dx = sc.x.step;
+          else if (evt.key === "ArrowDown") dy = -sc.y.step;
+          else if (evt.key === "ArrowUp") dy = sc.y.step;
+          else return;
+          evt.preventDefault();
+          moveFocus(f2[0] + dx, f2[1] + dy);
+          var again = plot.querySelector("rect[tabindex='0']");
+          if (again && again.focus) again.focus();
+        }
+      }
+
+      /* Note: the plots are SVG with a fixed viewBox, so they scale with the
+         container and need no redraw when a hidden step becomes visible. That
+         is the main reason SVG was chosen here over the canvas approach used
+         in Module 2. */
+
+      picker.value = SCENARIOS[0].id;
+      setScenario(SCENARIOS[0].id);
+    }
+  };
+
+  H.mount(pageModule);
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+</body>
+</html>
