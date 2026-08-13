@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interactive Business Analytics Tools | FinE Lab</title>
+<style>
+:root{--gold:#CFB991;--black:#000;--gray:#5f5f5f;--light:#f6f5f2;--border:#ddd9d0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--black);background:#fff;line-height:1.5}
+.top{height:8px;background:var(--gold)}
+header,main,footer{max-width:1100px;margin:auto;padding-left:24px;padding-right:24px}
+header{padding-top:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+header strong{font-size:1.1rem}
+header span{display:block;color:var(--gray);margin-top:3px}
+main{padding-top:52px;padding-bottom:64px}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.05;margin:0 0 18px}
+.intro{max-width:760px;color:var(--gray);font-size:1.05rem}
+.note{display:inline-block;margin:18px 0 38px;padding:9px 12px;background:var(--light);border-left:4px solid var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{border:1px solid var(--border);border-top:4px solid var(--gold);padding:22px;display:flex;flex-direction:column;min-height:225px}
+.tag{font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#665538}
+.card h2{font-size:1.15rem;line-height:1.25;margin:8px 0}
+.card p{color:var(--gray);font-size:.93rem;margin:4px 0 18px}
+.card a{margin-top:auto;text-align:center;text-decoration:none;font-weight:700;background:var(--black);color:#fff;padding:11px 12px;border:2px solid var(--black)}
+.card a:hover,.card a:focus{background:var(--gold);color:var(--black)}
+.about{margin-top:48px;padding:24px;background:var(--light);border-left:5px solid var(--gold)}
+.about h2{margin-top:0}
+.about p{margin-bottom:0;color:#333}
+footer{border-top:1px solid var(--border);padding-top:26px;padding-bottom:34px;color:var(--gray);font-size:.88rem}
+footer a{color:inherit}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.card{min-height:0}}
+</style>
+</head>
+<body>
+<div class="top"></div>
+<header>
+  <strong>Financial Intelligence for Consumer Well-Being Lab</strong>
+  <span>Purdue University</span>
+</header>
+
+<main>
+  <h1>Interactive Business Analytics Tools</h1>
+  <p class="intro">Explore key business analytics ideas by manipulating data, testing assumptions, and interpreting results in hospitality and service-industry contexts.</p>
+  <div class="note">Optional learning and practice resources. Nothing is submitted or recorded.</div>
+
+  <div class="grid">
+    <article class="card">
+      <div class="tag">Descriptive Statistics</div>
+      <h2>Mean, Median &amp; Outlier Explorer</h2>
+      <p>See how extreme observations affect common measures of center.</p>
+      <a href="HTM514_MeanMedian_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Relationships</div>
+      <h2>Correlation Explorer</h2>
+      <p>Manipulate a point and observe how linear association changes.</p>
+      <a href="HTM514_CorrelationExplorer_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Probability</div>
+      <h2>Probability &amp; Distribution Explorer</h2>
+      <p>Compare Normal, Binomial, and Poisson models.</p>
+      <a href="HTM514_Probability_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Decision Analysis</div>
+      <h2>Decision &amp; Expected Value</h2>
+      <p>Change probabilities and see when the preferred decision changes.</p>
+      <a href="HTM514_DecisionEMV_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Sampling</div>
+      <h2>Sampling Variability</h2>
+      <p>Explore why sample estimates vary and how sample size matters.</p>
+      <a href="HTM514_SamplingVariability_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Estimation</div>
+      <h2>Confidence Interval Explorer</h2>
+      <p>See how sample size and confidence level affect interval width.</p>
+      <a href="HTM514_ConfidenceInterval_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Inference</div>
+      <h2>Hypothesis Testing &amp; p-value Explorer</h2>
+      <p>Watch statistical evidence change as results and uncertainty change.</p>
+      <a href="HTM514_HypothesisTesting_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Group Comparisons</div>
+      <h2>ANOVA Concept Explorer</h2>
+      <p>Compare between-group and within-group variation.</p>
+      <a href="HTM514_ANOVA_standalone.html">Open interactive</a>
+    </article>
+
+    <article class="card">
+      <div class="tag">Regression</div>
+      <h2>Regression Interpretation Trainer</h2>
+      <p>Practice interpreting coefficients, p-values, R², indicators, and interactions.</p>
+      <a href="HTM514_Regression_standalone.html">Open interactive</a>
+    </article>
+  </div>
+
+  <section class="about">
+    <h2>About these tools</h2>
+    <p>These resources are designed to help learners see, manipulate, and interpret core business analytics concepts rather than simply calculate answers.</p>
+  </section>
+</main>
+
+<footer>
+  <strong>Developed by Dr. Wookjae Heo</strong> · Purdue University · Financial Intelligence for Consumer Well-Being Lab
+</footer>
+</body>
+</html>
